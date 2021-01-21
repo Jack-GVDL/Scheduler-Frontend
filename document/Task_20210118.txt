@@ -1,0 +1,12 @@
+- data server
+	- query
+		- getTodayEvent
+		- getWeeklyEvent
+		- getMonthlyEvent
+		* may need to make into the same thing
+
+	- data binding
+		- bind with date ?
+		- if the content in that date changed, then call update function
+		- register data listener ?
+		- what is the update function ?
