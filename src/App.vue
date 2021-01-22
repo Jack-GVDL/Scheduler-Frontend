@@ -1,22 +1,22 @@
 <template>
   <v-app id="background">
-    <div>
-      <Navbar />
-      <router-view id="router" to="/"></router-view>
-    </div>
+    <Profile/>
   </v-app>
 </template>
 
 
 <script>
-import Navbar from "@/components/Navbar";
+import Profile from "@/views/Profile";
 
 
 export default {
   name: "App",
   components: {
-    Navbar
-  }
+    Profile,
+  },
+  data: () => ({
+    sidebar: false
+  })
 };
 </script>
 
@@ -28,5 +28,9 @@ export default {
 
 #router {
   height: auto;
+}
+
+.opacity_0 {
+  background: rgba(0, 0, 0, 0.0);
 }
 </style>

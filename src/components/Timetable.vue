@@ -3,6 +3,12 @@
     flat
     class="opacity_0"
   >
+    <Sidebar_EventEditor
+      v-bind:Interface_showSidebar="ChildShowSidebar"
+      v-bind:Interface_hideSidebar="ChildHideSidebar"
+      v-bind:Interface_updateEvent="ChildUpdateEvent"
+    />
+
     <!-- sort -->
     <v-container
       class="opacity_0 my-0"
@@ -10,14 +16,38 @@
     >
       <!-- sort by task -->
       <v-layout row class="opacity_0">
-        <v-btn small depressed color="transparent" class="opacity_0 mx-3 text-body-1 font-weight-light" @click="sortEventListByName();">
-          <v-icon left small :color="colorTask">folder</v-icon>
+        <v-btn
+          small
+          depressed
+          color="transparent"
+          class="opacity_0 mx-3 text-body-1 font-weight-light"
+          @click="sortEventListByName();"
+        >
+          <v-icon
+            left
+            small
+            :color="colorTask"
+          >
+            folder
+          </v-icon>
           <span class="white--text">By Task</span>
         </v-btn>
 
         <!-- sort by time -->
-        <v-btn small depressed color="transparent" class="opacity_0 mx-3 text-body-1 font-weight-light" @click="sortEventListByTime();">
-          <v-icon left small :color="colorTime">folder</v-icon>
+        <v-btn
+          small
+          depressed
+          color="transparent"
+          class="opacity_0 mx-3 text-body-1 font-weight-light"
+          @click="sortEventListByTime();"
+        >
+          <v-icon
+            left
+            small
+            :color="colorTime"
+          >
+            folder
+          </v-icon>
           <span class="white--text">By Time</span>
         </v-btn>
       </v-layout>
@@ -85,25 +115,25 @@
                 </div>
               </v-col>
 
-              <v-col class="col-1 col-sm-1 col-md-1 d-none d-sm-flex justify-end">
-                <div class="justify-space-between">
-                  <v-icon
-                    class="mx-1"
-                    color="white"
-                    @click.stop="Handler_configEvent(item[5]);"
-                  >
-                    mdi-cogs
-                  </v-icon>
-                  <v-icon
-                    class="mx-1"
-                    color="error"
-                    plain
-                    @click.stop="Handler_rmEvent(item[5]);"
-                  >
-                    delete
-                  </v-icon>
-                </div>
-              </v-col>
+<!--              <v-col class="col-1 col-sm-1 col-md-1 d-none d-sm-flex justify-end">-->
+<!--                <div class="justify-space-between">-->
+<!--                  <v-icon-->
+<!--                    class="mx-1"-->
+<!--                    color="white"-->
+<!--                    @click.stop="Handler_configEvent(item[5]);"-->
+<!--                  >-->
+<!--                    mdi-cogs-->
+<!--                  </v-icon>-->
+<!--                  <v-icon-->
+<!--                    class="mx-1"-->
+<!--                    color="error"-->
+<!--                    plain-->
+<!--                    @click.stop="Handler_rmEvent(item[5]);"-->
+<!--                  >-->
+<!--                    delete-->
+<!--                  </v-icon>-->
+<!--                </div>-->
+<!--              </v-col>-->
 
             </v-row>
           </v-container>
@@ -117,11 +147,12 @@
 
 <script>
 import { getPalette, registerCallback, rmEvent } from "@/network/dataServer";
+import Sidebar_EventEditor from "@/components/Sidebar_EventEditor";
 
 
 // Data
 const INDEX_TASK      = 0;
-const INDEX_DATE      = 1;
+const INDEX_TIME      = 1;
 const INDEX_PROGRESS  = 2;
 const INDEX_TAG_LIST  = 3;
 const INDEX_TAG_COLOR = 4;
@@ -153,6 +184,10 @@ function compareEventName(a, b) {
 
 // Global Function
 export default {
+  components: {
+    Sidebar_EventEditor
+  },
+
   data: () => ({
     eventList: [],
 
@@ -162,12 +197,14 @@ export default {
     sortedBy: 1,
     lockSorting: false,
 
-    // TODO: need this before the reason why the array data is corrupted when
-    //  it is nav to another page and back
-    flagBlockSingleDataUpdate: false,
-
     colorTask: "grey",
-    colorTime: "grey"
+    colorTime: "grey",
+
+    // interface
+    // InterfaceToggleSidebar: false,
+    ChildShowSidebar: false,
+    ChildHideSidebar: false,
+    ChildUpdateEvent: []
   }),
 
   computed: {
@@ -220,9 +257,6 @@ export default {
 
       // lock
       this.lockSorting = false;
-
-      // flag
-      this.flagBlockSingleDataUpdate = true;
     },
 
     sortEventListByName: function() {
@@ -237,9 +271,6 @@ export default {
 
       // lock
       this.lockSorting = false;
-
-      // flag
-      this.flagBlockSingleDataUpdate = true;
     },
 
     setTagColor: function() {
@@ -264,12 +295,17 @@ export default {
       console.log("Need warning dialog");
     },
 
-    Handler_configEvent: function(index) {
-      console.log("Config event");
-    },
-
     Handler_showEventDetail: function(index) {
-      console.log("Show event");
+      // pass data
+      const data = this.eventList[index];
+      this.ChildUpdateEvent = [
+        data[0],
+        data[1],
+        [...data[3]]
+      ];
+
+      // show the sidebar
+      this.ChildShowSidebar = !this.ChildShowSidebar;
     }
   },
 
@@ -282,15 +318,6 @@ export default {
   },
 
   updated() {
-    // // update data
-    // if (!this.flagBlockSingleDataUpdate) {
-    //   const today = new Date();
-    //
-    //   update([today.getFullYear(), today.getMonth() + 1, today.getDate()]);
-    // }
-    //
-    // // reset flag
-    // this.flagBlockSingleDataUpdate = false;
   }
 };
 </script>

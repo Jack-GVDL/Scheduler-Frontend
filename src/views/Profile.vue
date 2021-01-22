@@ -1,6 +1,7 @@
 <template>
   <v-container fluid>
     <v-row class="opacity_0">
+
       <!-- widget: Today -->
       <v-col class="opacity_0">
         <v-card
@@ -44,17 +45,10 @@
 
 <script>
 import Timetable from "@/components/Timetable.vue";
-import WeeklyChart from "@/components/WeeklyChart.vue";
-import MonthlyChart from "@/components/MonthlyChart.vue";
-import YearlyChart from "@/components/YearlyChart.vue";
 
 export default {
   components: {
-    Timetable,
-    WeeklyChart,
-    MonthlyChart,
-    YearlyChart
-    // ActivityTable
+    Timetable
   }
 };
 </script>
