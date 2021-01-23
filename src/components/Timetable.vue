@@ -1,81 +1,92 @@
 <template>
   <v-card
     flat
-    class="opacity_0"
+    class="opacity_0 no_select"
   >
-    <Sidebar_EventEditor
-      v-bind:Interface_showSidebar="ChildShowSidebar"
-      v-bind:Interface_hideSidebar="ChildHideSidebar"
-      v-bind:Interface_updateEvent="ChildUpdateEvent"
-    />
 
-    <!-- sort -->
+    <!-- top -->
     <v-container
-      class="opacity_0 my-0"
+      class="opacity_0"
       fluid
     >
-      <!-- sort by task -->
-      <v-layout row class="opacity_0">
-        <v-btn
-          small
-          depressed
-          color="transparent"
-          class="opacity_0 mx-3 text-body-1 font-weight-light"
-          @click="sortEventListByName();"
-        >
-          <v-icon
-            left
-            small
-            :color="colorTask"
-          >
-            folder
-          </v-icon>
-          <span class="white--text">By Task</span>
-        </v-btn>
+      <v-row
+        class="my-0"
+      >
 
-        <!-- sort by time -->
-        <v-btn
-          small
-          depressed
-          color="transparent"
-          class="opacity_0 mx-3 text-body-1 font-weight-light"
-          @click="sortEventListByTime();"
-        >
-          <v-icon
-            left
+        <v-col>
+          <!-- sort by task -->
+          <v-btn
             small
-            :color="colorTime"
+            depressed
+            color="transparent"
+            class="opacity_0 mx-3 text-body-1 font-weight-light"
+            @click="sortEventListByName();"
           >
-            folder
-          </v-icon>
-          <span class="white--text">By Time</span>
-        </v-btn>
-      </v-layout>
+            <v-icon
+              left
+              small
+              :color="colorTask"
+            >
+              folder
+            </v-icon>
+            <span class="white--text">By Task</span>
+          </v-btn>
+
+          <!-- sort by time -->
+          <v-btn
+            small
+            depressed
+            color="transparent"
+            class="opacity_0 mx-3 text-body-1 font-weight-light"
+            @click="sortEventListByTime();"
+          >
+            <v-icon
+              left
+              small
+              :color="colorTime"
+            >
+              folder
+            </v-icon>
+            <span class="white--text">By Time</span>
+          </v-btn>
+        </v-col>
+
+        <v-col class="d-flex justify-end">
+          <v-btn
+            small
+            depressed
+            color="transparent"
+            @click="Handler_addEvent();"
+          >
+            <v-icon class="mx-2" :color="colorAdd">mdi-plus</v-icon>
+            <span class="white--text text-body-1 font-weight-light">Add</span>
+          </v-btn>
+
+          <v-btn
+            small
+            depressed
+            color="transparent"
+            @click="Handler_toggleDeleteButton();"
+          >
+            <v-icon class="mx-2" :color="colorRemove">mdi-minus</v-icon>
+            <span class="white--text text-body-1 font-weight-light">Remove</span>
+          </v-btn>
+        </v-col>
+
+      </v-row>
     </v-container>
-
-    <!-- table title -->
-    <!-- <v-container class="my-0" fluid>
-			<v-layout row class="mx-3">
-
-				<v-flex sm6 md6>
-					<span>Task</span>
-				</v-flex>
-
-				<v-flex sm6 md3 hidden-xs-only>
-					<span>Time</span>
-				</v-flex>
-
-				<v-flex md3 hidden-sm-and-down>
-					<span>Tag</span>
-				</v-flex>
-
-			</v-layout>
-		</v-container> -->
 
     <v-divider></v-divider>
 
+    <Sidebar_EventEditor
+      v-bind:Interface_showSidebar="ChildShowSidebar"
+      v-bind:Interface_hideSidebar="ChildHideSidebar"
+      v-bind:Interface_setEvent="ChildUpdateEvent"
+    />
+
     <!-- scrollable to display time tab -->
-    <v-virtual-scroll :items="eventList" height="600" item-height="70">
+    <v-virtual-scroll :items="eventListDisplay" height="600" item-height="70">
+
       <template v-slot="{ item }">
 
         <v-list-item
@@ -85,9 +96,9 @@
         >
           <v-container
             @click="Handler_showEventDetail(item[5]);"
-            class="px-0 mx-0 py-0 justify-start"
+            class="px-0 mx-0 py-0"
           >
-            <v-row class="justify-space-between">
+            <v-row class="d-flex justify-space-between">
 
               <v-col  class="col-6 col-sm-6 col-md-5 col-mx-5 d-block justify-start">
                 <div class="justify-start">
@@ -115,25 +126,18 @@
                 </div>
               </v-col>
 
-<!--              <v-col class="col-1 col-sm-1 col-md-1 d-none d-sm-flex justify-end">-->
-<!--                <div class="justify-space-between">-->
-<!--                  <v-icon-->
-<!--                    class="mx-1"-->
-<!--                    color="white"-->
-<!--                    @click.stop="Handler_configEvent(item[5]);"-->
-<!--                  >-->
-<!--                    mdi-cogs-->
-<!--                  </v-icon>-->
-<!--                  <v-icon-->
-<!--                    class="mx-1"-->
-<!--                    color="error"-->
-<!--                    plain-->
-<!--                    @click.stop="Handler_rmEvent(item[5]);"-->
-<!--                  >-->
-<!--                    delete-->
-<!--                  </v-icon>-->
-<!--                </div>-->
-<!--              </v-col>-->
+              <v-col class="col-1 col-sm-1 col-md-1 d-flex">
+                <div v-if="isShowDelete" class="d-flex-col justify-end">
+                  <v-icon
+                    class="mx-1"
+                    color="error"
+                    plain
+                    @click.stop="Handler_rmEvent(item[5]);"
+                  >
+                    delete
+                  </v-icon>
+                </div>
+              </v-col>
 
             </v-row>
           </v-container>
@@ -151,12 +155,7 @@ import Sidebar_EventEditor from "@/components/Sidebar_EventEditor";
 
 
 // Data
-const INDEX_TASK      = 0;
-const INDEX_TIME      = 1;
-const INDEX_PROGRESS  = 2;
-const INDEX_TAG_LIST  = 3;
-const INDEX_TAG_COLOR = 4;
-const INDEX_INDEX     = 5;
+// ...
 
 
 // Local Function
@@ -189,6 +188,7 @@ export default {
   },
 
   data: () => ({
+    eventListDisplay: [],
     eventList: [],
 
     // sortedBy
@@ -199,6 +199,11 @@ export default {
 
     colorTask: "grey",
     colorTime: "grey",
+    colorAdd: "green",
+    colorRemove: "white",
+
+    // show
+    isShowDelete: false,
 
     // interface
     // InterfaceToggleSidebar: false,
@@ -212,32 +217,38 @@ export default {
 
   methods: {
     updateEventList: function(data) {
+      // ----- eventList -----
+      this.eventList = data;
+
+      // ----- eventListDisplay -----
       // remove old item
-      while (this.eventList.length > 0) this.eventList.pop();
+      while (this.eventListDisplay.length > 0) this.eventListDisplay.pop();
 
       // add new item
       for (let i = 0; i < data.length; i++) {
 
-        // append for palette
-        const item         = [...data[i]];
-        const paletteList  = [];
-        for (let indexTag = 0; indexTag < item[3].length; indexTag++) {
-          paletteList.push(getPalette(item[3][indexTag]));
-        }
-
-        item.push(paletteList);
+        // display item
+        const eventDisplay = [...this.eventList[i]];
+        const event        = this.eventList[i];
 
         // time
-        item[1] =
-          pad(item[1][0], 2) + ':' + pad(item[1][1], 2) +
+        eventDisplay[1] =
+          pad(event[1][0], 2) + ':' + pad(event[1][1], 2) +
           " - " +
-          pad(item[1][2], 2) + ':' + pad(item[1][3], 2);
+          pad(event[1][2], 2) + ':' + pad(event[1][3], 2);
+
+        // append for palette
+        const paletteList = [];
+        for (let indexTag = 0; indexTag < event[3].length; indexTag++) {
+          paletteList.push(getPalette(event[3][indexTag]));
+        }
+        eventDisplay.push(paletteList);
 
         // the ground truth index
-        item.push(i);
+        eventDisplay.push(i);
 
         // add to eventList
-        this.eventList.push(item);
+        this.eventListDisplay.push(eventDisplay);
       }
 
       // sort
@@ -251,7 +262,7 @@ export default {
       this.lockSorting = true;
 
       // actual sorting
-      this.eventList.sort(compareEventTime);
+      this.eventListDisplay.sort(compareEventTime);
       this.sortedBy = 1;
       this.setTagColor();
 
@@ -265,7 +276,7 @@ export default {
       this.lockSorting = true;
 
       // actual sorting
-      this.eventList.sort(compareEventName);
+      this.eventListDisplay.sort(compareEventName);
       this.sortedBy = 2;
       this.setTagColor();
 
@@ -288,6 +299,62 @@ export default {
       }
     },
 
+    enableSidebar(index) {
+      // format
+      // - task name
+      // - time
+      // - tag list
+      // - state
+      let data;
+
+      // if index < 0, then it is the "add" state instead of "config" state
+      // ----- add state -----
+      if (index < 0) {
+        // get current time
+        const today = new Date();
+
+        // set data
+        data = [
+          "",
+          [today.getHours(), today.getMinutes(), today.getHours(), today.getMinutes()],
+          [],
+          0
+        ]
+      }
+
+      // ----- config state -----
+      else {
+        // pass data (the copied data)
+        const temp = this.eventList[index];
+        data = [
+          temp[0],
+          temp[1],
+          temp[3],
+          1
+        ]
+      }
+
+      this.ChildUpdateEvent = Array.from(data);
+
+      // show the sidebar
+      this.ChildShowSidebar = !this.ChildShowSidebar;
+    },
+
+    Handler_addEvent: function() {
+      this.enableSidebar(-1);
+    },
+
+    Handler_toggleDeleteButton: function() {
+      if (this.isShowDelete) {
+        this.isShowDelete = false;
+        this.colorRemove = "white";
+
+      } else {
+        this.isShowDelete = true;
+        this.colorRemove = "red";
+      }
+    },
+
     Handler_rmEvent: function(index) {
       const today = new Date();
       // rmEvent([today.getFullYear(), today.getMonth() + 1, today.getDate()], index);
@@ -296,16 +363,7 @@ export default {
     },
 
     Handler_showEventDetail: function(index) {
-      // pass data
-      const data = this.eventList[index];
-      this.ChildUpdateEvent = [
-        data[0],
-        data[1],
-        [...data[3]]
-      ];
-
-      // show the sidebar
-      this.ChildShowSidebar = !this.ChildShowSidebar;
+      this.enableSidebar(index);
     }
   },
 
@@ -344,5 +402,15 @@ export default {
 
 .opacity_1 {
   background: rgba(100, 110, 120, 0.8);
+}
+
+/*tool*/
+.no_select {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none;   /* Safari */
+  /*-khtml-user-select: none;    !* Konqueror HTML *!*/
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* Internet Explorer/Edge */
+  user-select: none;           /* Non-prefixed version, currently supported by Chrome and Opera */
 }
 </style>

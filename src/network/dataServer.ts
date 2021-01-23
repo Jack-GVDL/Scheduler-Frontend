@@ -195,7 +195,8 @@ export function update(date: any, isFromCache: any = true) {
   // update by calling all callback
   const callbackList = registeredCallback.get(hash);
   for (const callback of callbackList) {
-    const temp = [...data];
+    // const temp = [...data];
+    const temp = Array.from(data);
     callback(temp);
   }
 }

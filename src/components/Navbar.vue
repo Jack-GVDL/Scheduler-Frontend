@@ -123,8 +123,10 @@
   </v-card>
 </template>
 
+
 <script>
 import {addEvent} from "@/network/dataServer"
+
 
 // Local Function
 // https://stackoverflow.com/questions/2998784/how-to-output-numbers-with-leading-zeros-in-javascript
