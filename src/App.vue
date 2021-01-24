@@ -24,10 +24,8 @@ export default {
 <style scoped>
 #background {
   background-image: url('~@/assets/Background.jpg');
-}
-
-#router {
-  height: auto;
+  /*background-color: rgb(100, 100, 100);*/
+  background-attachment: fixed;
 }
 
 .opacity_0 {

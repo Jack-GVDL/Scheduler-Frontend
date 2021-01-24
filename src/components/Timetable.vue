@@ -9,6 +9,12 @@
       class="opacity_0"
       fluid
     >
+      <v-row>
+        <v-col>
+          <div class="mx-8 mb-2 white--text text-h6 font-weight-light">Total Time: {{ textTimeTotal }} hr</div>
+        </v-col>
+      </v-row>
+
       <v-row
         class="my-0"
       >
@@ -119,7 +125,7 @@
                 <div class="right">
                   <v-chip
                     dark
-                    class="mx-1 text-body-1 font-weight-light"
+                    class="mx-1 my-2 text-body-1 font-weight-light"
                     v-for="(tag, i) in item[3]"
                     :color="item[4][i]"
                     :key="i"
@@ -151,7 +157,8 @@
 
 
 <script>
-import { getPalette, registerCallback, addEvent, rmEvent, configEvent } from "@/network/DataServer";
+import { getTaskName, getTotalTime, getPalette, pad } from "@/utility/Utility"
+import { registerCallback, addEvent, rmEvent, configEvent } from "@/network/DataServer";
 import Sidebar_EventEditor from "@/components/Sidebar_EventEditor";
 
 
@@ -160,14 +167,6 @@ import Sidebar_EventEditor from "@/components/Sidebar_EventEditor";
 
 
 // Local Function
-// https://stackoverflow.com/questions/2998784/how-to-output-numbers-with-leading-zeros-in-javascript
-function pad(num, size) {
-  num = num.toString();
-  while (num.length < size) num = "0" + num;
-  return num;
-}
-
-
 function compareEventTime(a, b) {
   if (a[1] < b[1]) return -1;
   if (a[1] > b[1]) return 1;
@@ -182,6 +181,20 @@ function compareEventName(a, b) {
 }
 
 
+function computeStage(timeStart, timeEnd) {
+  const time_current  = new Date();
+  let   time_start    = new Date();
+  let   time_end      = new Date();
+
+  time_start.setHours(timeStart[0], timeStart[1]);
+  time_end.setHours(timeEnd[0], timeEnd[1]);
+
+  if (time_end < time_current)    return "passed";
+  if (time_start > time_current)  return "future";
+  else                            return "ongoing";
+}
+
+
 // Global Function
 export default {
   components: {
@@ -189,6 +202,9 @@ export default {
   },
 
   data: () => ({
+    // statistic
+    textTimeTotal: 0,
+
     eventListDisplay: [],
     eventList: [],
 
@@ -229,8 +245,12 @@ export default {
       for (let i = 0; i < data.length; i++) {
 
         // display item
-        const eventDisplay = [...this.eventList[i]];
+        // TODO: create a empty array for eventDisplay instead
         const event        = this.eventList[i];
+        const eventDisplay = [...this.eventList[i]];
+
+        // name
+        eventDisplay[0] = getTaskName(eventDisplay[3]);
 
         // time
         eventDisplay[1] =
@@ -238,7 +258,10 @@ export default {
           " - " +
           pad(event[1][2], 2) + ':' + pad(event[1][3], 2);
 
-        // append for palette
+        // stage
+        eventDisplay[2] = computeStage([event[1][0], event[1][1]], [event[1][2], event[1][3]]);
+
+        // tag color - append for palette
         const paletteList = [];
         for (let indexTag = 0; indexTag < event[3].length; indexTag++) {
           paletteList.push(getPalette(event[3][indexTag]));
@@ -252,7 +275,16 @@ export default {
         this.eventListDisplay.push(eventDisplay);
       }
 
-      // sort
+      // ----- total time -----
+      let timeList = [];
+      for (const item of this.eventList) {
+        timeList.push(item[1]);
+      }
+
+      const time_total     = getTotalTime(timeList);
+      this.textTimeTotal   = time_total.toFixed(2);
+
+      //  ----- sort -----
       if (this.sortedBy === 1) this.sortEventListByTime();
       else                     this.sortEventListByName();
     },
@@ -316,7 +348,6 @@ export default {
 
         // set data
         data = [
-          "",
           [today.getHours(), today.getMinutes(), today.getHours(), today.getMinutes()],
           [],
           -1,
@@ -329,7 +360,6 @@ export default {
         // pass data (the copied data)
         const temp = this.eventList[index];
         data = [
-          temp[0],
           temp[1],
           temp[3],
           index,
@@ -360,9 +390,10 @@ export default {
 
     Handler_rmEvent(index) {
       const today = new Date();
-      // rmEvent([today.getFullYear(), today.getMonth() + 1, today.getDate()], index);
+      rmEvent([today.getFullYear(), today.getMonth() + 1, today.getDate()], index);
 
-      console.log("Need warning dialog");
+      // TODO
+      // console.log("Need warning dialog");
     },
 
     Handler_showEventDetail(index) {
@@ -375,15 +406,15 @@ export default {
       const date = [today.getFullYear(), today.getMonth() + 1, today.getDate()];
 
       // send request to server
-      switch (data[4]) {
+      switch (data[3]) {
         // add
         case 0:
-          addEvent(date, data[1].slice(0, 2), data[1].slice(2, 4), data[2]);
+          addEvent(date, data[0].slice(0, 2), data[0].slice(2, 4), data[1]);
           break;
 
         // config
         case 1:
-          configEvent(date, data[3], data[1].slice(0, 2), data[1].slice(2, 4), data[2]);
+          configEvent(date, data[2], data[0].slice(0, 2), data[0].slice(2, 4), data[1]);
           break;
       }
     }
@@ -408,7 +439,7 @@ export default {
   border-left: 4px solid #3cd1c2;
 }
 .ongoing {
-  border-left: 4px solid orange;
+  border-left: 4px solid yellow;
 }
 .future {
   border-left: 4px solid tomato;

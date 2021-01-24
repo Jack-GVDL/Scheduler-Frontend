@@ -1,5 +1,0 @@
-<template>
-  <div>
-    <h1>Add Task</h1>
-  </div>
-</template>

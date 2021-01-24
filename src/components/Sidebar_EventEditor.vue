@@ -7,6 +7,38 @@
     right
   >
 
+    <!-- save, load -->
+    <template class="mx-0 px-0">
+      <v-container class="mx-0 px-0 d-flex justify-start">
+        <v-row class="d-flex justify-start">
+
+          <v-col>
+            <v-btn
+              class="button_0 mx-3 error--text text-h6"
+              color="transparent"
+              elevation="0"
+              @click="Handler_close();"
+            >
+              Close
+            </v-btn>
+
+            <v-btn
+              class="mx-3 green--text text-h6"
+              color="transparent"
+              elevation="0"
+              :disabled="!isSaveButtonEnabled"
+              @click="Handler_save();"
+            >
+              Save
+            </v-btn>
+          </v-col>
+
+        </v-row>
+      </v-container>
+    </template>
+
+    <div class="my-6"></div>
+
     <v-list>
       <v-list-item>
         <div class="justify-start">
@@ -124,44 +156,12 @@
       </v-list-item>
     </v-list>
 
-    <!-- save, load -->
-    <template class="mx-0 px-0" v-slot:append>
-      <v-container class="mx-0 px-0">
-        <v-row justify="space-between">
-
-          <v-col>
-            <v-btn
-              class="button_0 mx-3 error--text text-h6"
-              color="transparent"
-              elevation="0"
-              @click="Handler_close();"
-            >
-              Close
-            </v-btn>
-          </v-col>
-
-          <v-col class="d-flex justify-end">
-            <v-btn
-              class="mx-3 green--text text-h6"
-              color="transparent"
-              elevation="0"
-              :disabled="!isSaveButtonEnabled"
-              @click="Handler_save();"
-            >
-              Save
-            </v-btn>
-          </v-col>
-
-        </v-row>
-      </v-container>
-    </template>
-
   </v-navigation-drawer>
 </template>
 
 
 <script>
-import { getPalette } from "@/network/DataServer";
+import { getTaskName, getPalette } from "@/utility/Utility"
 
 
 // Local Function
@@ -215,7 +215,6 @@ export default {
   }),
 
   props: [
-    // "Interface_toggleSidebar",
     "Interface_showSidebar",
     "Interface_hideSidebar",
     "Interface_setEvent"
@@ -239,30 +238,36 @@ export default {
     },
 
     setEvent(eventData) {
-      // set text field
-      this.textTask = eventData[0];
+      // eventData
+      // - time
+      // - tag list
+      // - event index
+      // - edit state
 
       // time
-      this.textTimeStart = pad(eventData[1][0], 2) + ':' + pad(eventData[1][1], 2);
-      this.textTimeEnd   = pad(eventData[1][2], 2) + ':' + pad(eventData[1][3], 2);
+      this.textTimeStart = pad(eventData[0][0], 2) + ':' + pad(eventData[0][1], 2);
+      this.textTimeEnd   = pad(eventData[0][2], 2) + ':' + pad(eventData[0][3], 2);
 
       // tag list
       while (this.eventTag.length > 0) this.eventTag.pop();
-      for (let i = 0; i < eventData[2].length; i++) {
-        this.eventTag.push(eventData[2][i]);
+      for (let i = 0; i < eventData[1].length; i++) {
+        this.eventTag.push(eventData[1][i]);
       }
 
       // tag color
       while (this.eventColor.length > 0) this.eventColor.pop();
-      for (let i = 0; i < eventData[2].length; i++) {
-        this.eventColor.push(getPalette(eventData[2][i]));
+      for (let i = 0; i < eventData[1].length; i++) {
+        this.eventColor.push(getPalette(eventData[1][i]));
       }
 
       // event index
-      this.eventIndex = eventData[3];
+      this.eventIndex = eventData[2];
 
       // state
-      this.editState = eventData[4];
+      this.editState = eventData[3];
+
+      // task name
+      this.textTask = getTaskName(this.eventTag);
 
       // update
       this.updateSaveButton();
@@ -278,37 +283,22 @@ export default {
       ];
 
       // pack data
-      // - task name
       // - time
       // - tag
       // - state (add / config)
       const data = [
-        this.textTask,
         timeList,
         this.eventTag,
         this.eventIndex,
         this.editState
       ];
 
-      console.log(data);
-
       // emit signal
       this.$emit("Interface_save", data);
     },
 
     updateTaskName() {
-      // sort the tag based on lex order
-      this.eventTag.sort();
-
-      // construct string
-      let name = "";
-      for (let i = 0; i < this.eventTag.length; i++) {
-        if (i != 0) {
-          name += ", ";
-        }
-        name += this.eventTag[i];
-      }
-      this.textTask = name;
+      this.textTask = getTaskName(this.eventTag);
     },
 
     updateSaveButton() {

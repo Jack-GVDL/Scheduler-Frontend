@@ -2,39 +2,13 @@ import axios, { AxiosRequestConfig } from "axios";
 
 
 // Local Data
-const paletteMap          = new Map();
 const registeredCallback  = new Map();
 const cachedEvent         = new Map();
 
+let   serverAddress       = "http://localhost:5000";
+
 
 // Local Function
-// https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately
-function convertHSVtoRGB(h: any, s: any, v: any) {
-  let r, g, b, i, f, p, q, t;
-  if (arguments.length === 1) {
-    s = h.s, v = h.v, h = h.h;
-  }
-  i = Math.floor(h * 6);
-  f = h * 6 - i;
-  p = v * (1 - s);
-  q = v * (1 - f * s);
-  t = v * (1 - (1 - f) * s);
-  switch (i % 6) {
-    case 0: r = v, g = t, b = p; break;
-    case 1: r = q, g = v, b = p; break;
-    case 2: r = p, g = v, b = t; break;
-    case 3: r = p, g = q, b = v; break;
-    case 4: r = t, g = p, b = v; break;
-    case 5: r = v, g = p, b = q; break;
-  }
-  return [
-    Math.round(r * 255),
-    Math.round(g * 255),
-    Math.round(b * 255)
-  ]
-}
-
-
 // hash
 function getHash_Date(date: any) {
   return date[0] * 10000 + date[1] * 100 + date[2];
@@ -53,7 +27,7 @@ function cacheEvent(date: any, data: any) {
 function request(config: AxiosRequestConfig) {
   // create instance
   const instance = axios.create({
-    baseURL: "http://localhost:5000",
+    baseURL: serverAddress,
     timeout: 5000
   });
 
@@ -164,32 +138,6 @@ function request_ConfigEvent(date: any, index: bigint, timeStart: any, timeEnd: 
 
 
 // Global Function
-export function getPalette(key: any) {
-  // first check if exist in palette list
-  // if not exist, then create the key and value
-  if (!paletteMap.has(key)) {
-
-    // generate random rgb
-    // HSV
-    // h: hue
-    // s: saturation
-    // v: value (brightness?)
-    let h = Math.random();
-    let s = 1.0;
-    let v = 0.8;
-
-    const color = convertHSVtoRGB(h, s, v);
-    const rgb   = 'rgb(' + color[0] + ',' + color[1] + ',' + color[2] + ', 0.5)';
-
-    // create key and value
-    paletteMap.set(key, rgb);
-  }
-
-  // return string of color code
-  return paletteMap.get(key);
-}
-
-
 export function registerCallback(date: any, callback: any) {
   // compute date hash
   const hash = getHash_Date(date);
@@ -235,7 +183,19 @@ export function update(date: any, isFromCache: any = true) {
 }
 
 
-// TODO: not yet completed
+export function updateAll(isFromCache: any = true) {
+  for (let key of registeredCallback.keys()) {
+    update([
+      Math.floor(key / 10000),
+      Math.floor((key / 100) % 100),
+      Math.floor(key % 100)],
+      isFromCache
+    );
+  }
+}
+
+
+// TODO
 // function getEvent_Date(date: any) {
 // }
 
@@ -252,4 +212,21 @@ export function rmEvent(date: any, index: bigint) {
 
 export function configEvent(date: any, index: bigint, timeStart: any, timeEnd: any, tagList: any) {
   request_ConfigEvent(date, index, timeStart, timeEnd, tagList);
+}
+
+
+export function getServerAddress() {
+  return serverAddress;
+}
+
+
+export function setServerAddress(address: string) {
+  // check if the same for new and old value
+  if (address === serverAddress) return;
+
+  // set address
+  serverAddress = address;
+
+  // update all the data from the new address
+  updateAll(false);
 }
