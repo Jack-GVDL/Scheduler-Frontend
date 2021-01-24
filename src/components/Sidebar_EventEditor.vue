@@ -161,7 +161,7 @@
 
 
 <script>
-import { getPalette } from "@/network/dataServer";
+import { getPalette } from "@/network/DataServer";
 
 
 // Local Function
@@ -258,8 +258,42 @@ export default {
         this.eventColor.push(getPalette(eventData[2][i]));
       }
 
+      // event index
+      this.eventIndex = eventData[3];
+
+      // state
+      this.editState = eventData[4];
+
       // update
       this.updateSaveButton();
+    },
+
+    pushEvent() {
+      // compute time_list
+      const timeList = [
+        parseInt(this.textTimeStart.slice(0, 2)),
+        parseInt(this.textTimeStart.slice(3, 5)),
+        parseInt(this.textTimeEnd.slice(0, 2)),
+        parseInt(this.textTimeEnd.slice(3, 5))
+      ];
+
+      // pack data
+      // - task name
+      // - time
+      // - tag
+      // - state (add / config)
+      const data = [
+        this.textTask,
+        timeList,
+        this.eventTag,
+        this.eventIndex,
+        this.editState
+      ];
+
+      console.log(data);
+
+      // emit signal
+      this.$emit("Interface_save", data);
     },
 
     updateTaskName() {
@@ -302,6 +336,10 @@ export default {
     },
 
     Handler_save() {
+      // push event to parent
+      this.pushEvent();
+
+      // hide
       this.hideSidebar();
     },
 
@@ -323,6 +361,9 @@ export default {
       // add tag
       this.eventTag.push(tag);
       this.eventColor.push(getPalette(tag));
+
+      // reset text field
+      this.textTag = "";
 
       // update
       this.updateTaskName();

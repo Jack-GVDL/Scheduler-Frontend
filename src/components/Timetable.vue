@@ -82,6 +82,7 @@
       v-bind:Interface_showSidebar="ChildShowSidebar"
       v-bind:Interface_hideSidebar="ChildHideSidebar"
       v-bind:Interface_setEvent="ChildUpdateEvent"
+      v-on:Interface_save="ChildSave"
     />
 
     <!-- scrollable to display time tab -->
@@ -150,7 +151,7 @@
 
 
 <script>
-import { getPalette, registerCallback, rmEvent } from "@/network/dataServer";
+import { getPalette, registerCallback, addEvent, rmEvent, configEvent } from "@/network/DataServer";
 import Sidebar_EventEditor from "@/components/Sidebar_EventEditor";
 
 
@@ -216,7 +217,7 @@ export default {
   },
 
   methods: {
-    updateEventList: function(data) {
+    updateEventList(data) {
       // ----- eventList -----
       this.eventList = data;
 
@@ -256,7 +257,7 @@ export default {
       else                     this.sortEventListByName();
     },
 
-    sortEventListByTime: function() {
+    sortEventListByTime() {
       // lock
       if (this.lockSorting) return;
       this.lockSorting = true;
@@ -270,7 +271,7 @@ export default {
       this.lockSorting = false;
     },
 
-    sortEventListByName: function() {
+    sortEventListByName() {
       // lock
       if (this.lockSorting) return;
       this.lockSorting = true;
@@ -284,7 +285,7 @@ export default {
       this.lockSorting = false;
     },
 
-    setTagColor: function() {
+    setTagColor() {
       switch (this.sortedBy) {
         // time
         case 1:
@@ -318,6 +319,7 @@ export default {
           "",
           [today.getHours(), today.getMinutes(), today.getHours(), today.getMinutes()],
           [],
+          -1,
           0
         ]
       }
@@ -330,6 +332,7 @@ export default {
           temp[0],
           temp[1],
           temp[3],
+          index,
           1
         ]
       }
@@ -340,11 +343,11 @@ export default {
       this.ChildShowSidebar = !this.ChildShowSidebar;
     },
 
-    Handler_addEvent: function() {
+    Handler_addEvent() {
       this.enableSidebar(-1);
     },
 
-    Handler_toggleDeleteButton: function() {
+    Handler_toggleDeleteButton() {
       if (this.isShowDelete) {
         this.isShowDelete = false;
         this.colorRemove = "white";
@@ -355,15 +358,34 @@ export default {
       }
     },
 
-    Handler_rmEvent: function(index) {
+    Handler_rmEvent(index) {
       const today = new Date();
       // rmEvent([today.getFullYear(), today.getMonth() + 1, today.getDate()], index);
 
       console.log("Need warning dialog");
     },
 
-    Handler_showEventDetail: function(index) {
+    Handler_showEventDetail(index) {
       this.enableSidebar(index);
+    },
+
+    ChildSave(data) {
+      // get today date
+      const today = new Date();
+      const date = [today.getFullYear(), today.getMonth() + 1, today.getDate()];
+
+      // send request to server
+      switch (data[4]) {
+        // add
+        case 0:
+          addEvent(date, data[1].slice(0, 2), data[1].slice(2, 4), data[2]);
+          break;
+
+        // config
+        case 1:
+          configEvent(date, data[3], data[1].slice(0, 2), data[1].slice(2, 4), data[2]);
+          break;
+      }
     }
   },
 

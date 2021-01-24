@@ -62,9 +62,7 @@ function request(config: AxiosRequestConfig) {
 }
 
 
-// TODO: may need to change the name and signature
-// function request_GetEvent_Date(date: any)
-function getEvent_Date(date: any) {
+function request_GetEvent_Date(date: any) {
   // compute hash
   // const hash = getDateHash(date);
 
@@ -92,7 +90,14 @@ function getEvent_Date(date: any) {
 }
 
 
-function request_AddEvent(date: any, timeStart: any, timeEnd: any, tag: any) {
+function request_AddEvent(date: any, timeStart: any, timeEnd: any, tagList: any) {
+  // compute tag string
+  let tag_string = "";
+  for (let i = 0; i < tagList.length; ++i) {
+    if (i != 0) tag_string += ",";
+    tag_string += tagList[i];
+  }
+
   // create request
   const instance = request({
     url: "/AddEvent",
@@ -101,7 +106,7 @@ function request_AddEvent(date: any, timeStart: any, timeEnd: any, tag: any) {
       date:       date[0] + '_' + date[1] + '_' + date[2],
       time_start: timeStart[0] + '_' + timeStart[1],
       time_end:   timeEnd[0] + '_' + timeEnd[1],
-      tag:        tag
+      tag:        tag_string
     }
   })
 
@@ -120,6 +125,34 @@ function request_RmEvent(date: any, index: bigint) {
     params: {
       date:       date[0] + '_' + date[1] + '_' + date[2],
       index:      index
+    }
+  })
+
+  // send request
+  instance.then(res => {
+    update(date, false);
+  }).catch();
+}
+
+
+function request_ConfigEvent(date: any, index: bigint, timeStart: any, timeEnd: any, tagList: any) {
+  // compute tag string
+  let tag_string = "";
+  for (let i = 0; i < tagList.length; ++i) {
+    if (i != 0) tag_string += ",";
+    tag_string += tagList[i];
+  }
+
+  // create request
+  const instance = request({
+    url: "/ConfigEvent",
+    method: "POST",
+    params: {
+      index:      index,
+      date:       date[0] + '_' + date[1] + '_' + date[2],
+      time_start: timeStart[0] + '_' + timeStart[1],
+      time_end:   timeEnd[0] + '_' + timeEnd[1],
+      tag:        tag_string
     }
   })
 
@@ -185,7 +218,7 @@ export function update(date: any, isFromCache: any = true) {
 
   // if isFromCache == false, which mean need to get data through the network
   if (!isFromCache || !cachedEvent.has(hash)) {
-    getEvent_Date(date);
+    request_GetEvent_Date(date);
     return;
   }
 
@@ -207,11 +240,16 @@ export function update(date: any, isFromCache: any = true) {
 // }
 
 
-export function addEvent(date: any, timeStart: any, timeEnd: any, tag: any) {
-  request_AddEvent(date, timeStart, timeEnd, tag);
+export function addEvent(date: any, timeStart: any, timeEnd: any, tagList: any) {
+  request_AddEvent(date, timeStart, timeEnd, tagList);
 }
 
 
 export function rmEvent(date: any, index: bigint) {
   request_RmEvent(date, index);
+}
+
+
+export function configEvent(date: any, index: bigint, timeStart: any, timeEnd: any, tagList: any) {
+  request_ConfigEvent(date, index, timeStart, timeEnd, tagList);
 }
