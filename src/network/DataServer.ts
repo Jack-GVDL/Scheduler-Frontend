@@ -138,7 +138,7 @@ function request_ConfigEvent(date: any, index: bigint, timeStart: any, timeEnd: 
 
 
 // Global Function
-export function registerCallback(date: any, callback: any) {
+export function registerCallback_Event(date: any, callback: any) {
   // compute date hash
   const hash = getHash_Date(date);
 
@@ -154,6 +154,12 @@ export function registerCallback(date: any, callback: any) {
   // update
   // TODO: currently is update all in the same date
   update(date);
+}
+
+
+// TODO
+export function registerCallback_Date(callback: any) {
+
 }
 
 

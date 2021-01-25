@@ -105,7 +105,7 @@
             @click="Handler_showEventDetail(item[5]);"
             class="px-0 mx-0 py-0"
           >
-            <v-row class="d-flex justify-space-between">
+            <v-row class="d-flex justify-space-between align-center">
 
               <v-col  class="col-6 col-sm-6 col-md-5 col-mx-5 d-block justify-start">
                 <div class="justify-start">
@@ -133,8 +133,8 @@
                 </div>
               </v-col>
 
-              <v-col class="col-1 col-sm-1 col-md-1 d-flex">
-                <div v-if="isShowDelete" class="d-flex-col justify-end">
+              <v-col class="col-1 col-sm-1 col-md-1 d-flex align-end">
+                <div v-if="isShowDelete">
                   <v-icon
                     class="mx-1"
                     color="error"
@@ -158,12 +158,13 @@
 
 <script>
 import { getTaskName, getTotalTime, getPalette, pad } from "@/utility/Utility"
-import { registerCallback, addEvent, rmEvent, configEvent } from "@/network/DataServer";
+import { registerCallback_Event, addEvent, rmEvent, configEvent } from "@/network/DataServer";
 import Sidebar_EventEditor from "@/components/Sidebar_EventEditor";
 
 
 // Data
-// ...
+const INDEX_TIME      = 0;
+const INDEX_TAG_LIST  = 1;
 
 
 // Local Function
@@ -182,12 +183,18 @@ function compareEventName(a, b) {
 
 
 function computeStage(timeStart, timeEnd) {
+  // get time
   const time_current  = new Date();
   let   time_start    = new Date();
   let   time_end      = new Date();
 
   time_start.setHours(timeStart[0], timeStart[1]);
   time_end.setHours(timeEnd[0], timeEnd[1]);
+
+  // compute stage based on start and end time
+  if (timeStart[0] === timeEnd[0] && timeStart[1] === timeEnd[1]) {
+    return "blank";
+  }
 
   if (time_end < time_current)    return "passed";
   if (time_start > time_current)  return "future";
@@ -242,29 +249,33 @@ export default {
       while (this.eventListDisplay.length > 0) this.eventListDisplay.pop();
 
       // add new item
-      for (let i = 0; i < data.length; i++) {
-
-        // display item
-        // TODO: create a empty array for eventDisplay instead
+      for (let i = 0; i < this.eventList.length; i++) {
         const event        = this.eventList[i];
-        const eventDisplay = [...this.eventList[i]];
+        const eventDisplay = [];
 
-        // name
-        eventDisplay[0] = getTaskName(eventDisplay[3]);
+        // task name
+        eventDisplay.push(getTaskName(event[INDEX_TAG_LIST]));
 
         // time
-        eventDisplay[1] =
-          pad(event[1][0], 2) + ':' + pad(event[1][1], 2) +
+        eventDisplay.push(
+          pad(event[INDEX_TIME][0], 2) + ':' + pad(event[INDEX_TIME][1], 2) +
           " - " +
-          pad(event[1][2], 2) + ':' + pad(event[1][3], 2);
+          pad(event[INDEX_TIME][2], 2) + ':' + pad(event[INDEX_TIME][3], 2)
+        );
 
         // stage
-        eventDisplay[2] = computeStage([event[1][0], event[1][1]], [event[1][2], event[1][3]]);
+        eventDisplay.push(computeStage(
+          [event[INDEX_TIME][0], event[INDEX_TIME][1]],
+          [event[INDEX_TIME][2], event[INDEX_TIME][3]]
+        ));
+
+        // tag
+        eventDisplay.push(event[INDEX_TAG_LIST]);
 
         // tag color - append for palette
         const paletteList = [];
-        for (let indexTag = 0; indexTag < event[3].length; indexTag++) {
-          paletteList.push(getPalette(event[3][indexTag]));
+        for (let indexTag = 0; indexTag < event[INDEX_TAG_LIST].length; indexTag++) {
+          paletteList.push(getPalette(event[INDEX_TAG_LIST][indexTag]));
         }
         eventDisplay.push(paletteList);
 
@@ -278,7 +289,7 @@ export default {
       // ----- total time -----
       let timeList = [];
       for (const item of this.eventList) {
-        timeList.push(item[1]);
+        timeList.push(item[INDEX_TIME]);
       }
 
       const time_total     = getTotalTime(timeList);
@@ -360,8 +371,8 @@ export default {
         // pass data (the copied data)
         const temp = this.eventList[index];
         data = [
-          temp[1],
-          temp[3],
+          temp[INDEX_TIME],
+          temp[INDEX_TAG_LIST],
           index,
           1
         ]
@@ -422,7 +433,7 @@ export default {
 
   mounted() {
     const today = new Date();
-    registerCallback(
+    registerCallback_Event(
       [today.getFullYear(), today.getMonth() + 1, today.getDate()],
       this.updateEventList
     );
@@ -439,6 +450,9 @@ export default {
   border-left: 4px solid #3cd1c2;
 }
 .ongoing {
+  border-left: 4px solid lightgreen;
+}
+.blank {
   border-left: 4px solid yellow;
 }
 .future {

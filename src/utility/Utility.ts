@@ -1,5 +1,5 @@
 // Data
-const paletteMap          = new Map();
+const paletteMap = new Map();
 
 
 // Local Function
@@ -38,9 +38,22 @@ export function getTaskName(tagList: any) {
   // construct string
   let name = "";
   for (let i = 0; i < tagList.length; i++) {
+
+    // skip empty tag (although it normal will not occur)
+    if (tagList[i].length == 0) continue;
+
+    // skip special tag
+    // *
+    // `
+    if (tagList[i][0] == '*') continue;
+    if (tagList[i][1] == '`') continue;
+
+    // add ',
     if (i != 0) {
       name += ", ";
     }
+
+    // actual add tag
     name += tagList[i];
   }
 
@@ -63,6 +76,11 @@ export function getTotalTime(timeList: any) {
 
 
 export function getPalette(key: any) {
+  // check if tag name is empty or not (although normally will not occur)
+  if (key.length == 0)  return "rgb(150, 150, 150)";
+  if (key[0] == '*')    return "rgb(150, 150, 150)";
+  if (key[0] == '`')    return "rgb(150, 150, 150)";
+
   // first check if exist in palette list
   // if not exist, then create the key and value
   if (!paletteMap.has(key)) {
