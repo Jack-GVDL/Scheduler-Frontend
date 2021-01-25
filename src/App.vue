@@ -1,5 +1,8 @@
 <template>
-  <v-app id="background">
+  <v-app
+    :style="css_property"
+    id="background"
+  >
     <Profile/>
   </v-app>
 </template>
@@ -7,6 +10,8 @@
 
 <script>
 import Profile from "@/views/Profile";
+import { ItemManager_addCallback, ItemManager_setItem } from "@/utility/ItemManager";
+import backgroundImage from "@/assets/Background.jpg"
 
 
 export default {
@@ -15,20 +20,32 @@ export default {
     Profile,
   },
   data: () => ({
-    sidebar: false
-  })
+    sidebar: false,
+    // background_image: backgroundImage,
+    css_property: {
+      backgroundImage: 'url(' + backgroundImage + ')'
+    }
+  }),
+
+  methods: {
+    Callback_BackgroundImage(value) {
+      // this.background_image = value;
+      this.css_property.backgroundImage = 'url(' + value + ')';
+    }
+  },
+
+  mounted: function() {
+    ItemManager_addCallback("BackgroundImage", this.Callback_BackgroundImage);
+    ItemManager_setItem("BackgroundImage", backgroundImage, false);
+  }
 };
 </script>
 
 
 <style scoped>
 #background {
-  background-image: url('~@/assets/Background.jpg');
+  /*background-image: url('~@/assets/Background.jpg');*/
   /*background-color: rgb(100, 100, 100);*/
   background-attachment: fixed;
-}
-
-.opacity_0 {
-  background: rgba(0, 0, 0, 0.0);
 }
 </style>

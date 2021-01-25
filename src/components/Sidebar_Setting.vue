@@ -57,9 +57,9 @@
           >
             Server Site
           </div>
-        <v-col>
+        <v-col class="my-0 py-0">
           <v-text-field
-            class="mr-10 white--text text-body-1 font-weight-light"
+            class="mr-10white--text text-body-1 font-weight-light"
             dark
             v-model="textAddress"
           ></v-text-field>
@@ -76,10 +76,11 @@
         >
           Background Image
         </div>
-        <v-col>
+        <v-col class="my-0 py-0">
           <v-text-field
-            dark
             class="mr-10 white--text text-body-1 font-weight-light"
+            dark
+            v-model="textImage"
           ></v-text-field>
         </v-col>
       </v-row>
@@ -108,6 +109,7 @@
 
 <script>
 // Import
+import { ItemManager_addCallback, ItemManager_getItem, ItemManager_setItem } from "@/utility/ItemManager";
 import { getServerAddress, setServerAddress } from "@/network/DataServer"
 const { remote } = require("electron");
 
@@ -137,8 +139,8 @@ export default {
     // update / reset
     updateForm() {
       this.textAddress  = getServerAddress();
+      this.textImage    = ItemManager_getItem("BackgroundImage", "none");
       this.isFullScreen = remote.getCurrentWindow().isFullScreen();
-      console.log(this.isFullScreen);
     },
 
     // handler
@@ -150,6 +152,7 @@ export default {
       // set configuration
       remote.getCurrentWindow().setFullScreen(this.isFullScreen);
       setServerAddress(this.textAddress);
+      ItemManager_setItem("BackgroundImage", this.textImage);
 
       // hide
       this.sidebar = false;

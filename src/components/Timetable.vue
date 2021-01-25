@@ -135,14 +135,18 @@
 
               <v-col class="col-1 col-sm-1 col-md-1 d-flex align-end">
                 <div v-if="isShowDelete">
-                  <v-icon
-                    class="mx-1"
-                    color="error"
-                    plain
+                  <v-btn
+                    icon
                     @click.stop="Handler_rmEvent(item[5]);"
                   >
-                    delete
-                  </v-icon>
+                    <v-icon
+                      class="mx-1"
+                      color="error"
+                      plain
+                    >
+                      delete
+                    </v-icon>
+                  </v-btn>
                 </div>
               </v-col>
 

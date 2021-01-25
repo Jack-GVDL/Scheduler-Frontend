@@ -110,13 +110,21 @@
 
           <v-row class="my-0">
             <v-col class="px-0 my-0 py-0">
-              <v-text-field
-                class="text_field_error my-0 py-0 text-input-white text-body-1 font-weight-light"
-                dark
-                v-model="textTag"
-                :rules="[rules.nonEmptyString, rules.nonSpaceString]"
+              <v-form
+                ref="formTag"
+                v-model="isInputValidTag"
               >
-              </v-text-field>
+                <v-text-field
+                  class="text_field_error my-0 py-0 text-input-white text-body-1 font-weight-light"
+                  dark
+                  clearable
+                  v-model="textTag"
+                  :rules="[rules.nonEmptyString, rules.nonSpaceString]"
+                  @keyup.enter.prevent="Handler_addTag();"
+                >
+                </v-text-field>
+                <v-text-field class="tool_hide"></v-text-field>
+              </v-form>
             </v-col>
 
             <v-col class="px-0 my-0 py-0 d-row justify-end">
@@ -191,6 +199,8 @@ export default {
     textTimeStart: "00:00",
     textTimeEnd: "00:00",
     textTag: "",
+
+    isInputValidTag: false,
 
     // widget enable / disable
     isSaveButtonEnabled: false,
@@ -344,9 +354,20 @@ export default {
     },
 
     Handler_addTag() {
+      // check if valid or not
+      // this.textTag will be null if the form is reset
+      // therefore checking null is needed
+      if (!this.isInputValidTag || this.textTag == null) {
+        this.$refs.formTag.reset();
+        return;
+      }
+
       // check if tag exist in the list or not
       const tag = this.textTag;
-      if (this.eventTag.find(item => item === tag)) return;
+      if (this.eventTag.find(item => item === tag)) {
+        this.$refs.formTag.reset();
+        return;
+      }
 
       // add tag
       this.eventTag.push(tag);
@@ -354,6 +375,7 @@ export default {
 
       // reset text field
       this.textTag = "";
+      this.$refs.formTag.reset();
 
       // update
       this.updateTaskName();
@@ -415,5 +437,11 @@ export default {
   -moz-user-select: none;      /* Firefox */
   -ms-user-select: none;       /* Internet Explorer/Edge */
   user-select: none;           /* Non-prefixed version, currently supported by Chrome and Opera */
+}
+
+/*Example of using hide*/
+/*https://forum.framework7.io/t/vue-pressing-enter-key-in-input-causes-app-to-reload/2585/10*/
+.tool_hide {
+  display: none;
 }
 </style>
