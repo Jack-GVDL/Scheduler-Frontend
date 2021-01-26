@@ -11,7 +11,7 @@
 <script>
 import Profile from "@/views/Profile";
 import { ItemManager_addCallback, ItemManager_setItem } from "@/utility/ItemManager";
-import backgroundImage from "@/assets/Background_1.jpg"
+import backgroundImage from "@/assets/Background_3.jpg"
 
 
 export default {
@@ -42,8 +42,9 @@ export default {
 
 <style scoped>
 #background {
-  /*background-image: url('~@/assets/Background.jpg');*/
+  /*background-image: url('~@/assets/Background_3.jpg');*/
   /*background-color: rgb(100, 100, 100);*/
+  background-size: cover;
   background-attachment: fixed;
 }
 </style>
