@@ -33,6 +33,7 @@ function convertHSVtoRGB(h: any, s: any, v: any) {
 // Global Function
 export function getTaskName(tagList: any) {
   // sort the tag based on lex order
+  tagList = Array.from(tagList);
   tagList.sort();
 
   // construct string
@@ -49,7 +50,7 @@ export function getTaskName(tagList: any) {
     if (tagList[i][1] == '`') continue;
 
     // add ',
-    if (i != 0) {
+    if (name.length != 0) {
       name += ", ";
     }
 

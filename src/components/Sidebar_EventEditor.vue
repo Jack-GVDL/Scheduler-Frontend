@@ -323,8 +323,13 @@ export default {
       // time - start before or same as end
       if (this.textTimeStart > this.textTimeEnd) return;
 
+      // name should not be empty
+      // as the name is computed by tag_list
+      // valid name means valid tag_list
+      if (this.textTask.length == 0) return;
+
       // tag - tag must not be empty
-      if (this.eventTag.length == 0) return;
+      // if (this.eventTag.length == 0) return;
 
       // all condition checked
       // re-enable the save button
@@ -358,6 +363,7 @@ export default {
       // this.textTag will be null if the form is reset
       // therefore checking null is needed
       if (!this.isInputValidTag || this.textTag == null) {
+        this.textTag = "";
         this.$refs.formTag.reset();
         return;
       }
@@ -365,6 +371,7 @@ export default {
       // check if tag exist in the list or not
       const tag = this.textTag;
       if (this.eventTag.find(item => item === tag)) {
+        this.textTag = "";
         this.$refs.formTag.reset();
         return;
       }

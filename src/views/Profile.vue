@@ -84,7 +84,7 @@ export default {
 
   methods: {
     Handle_refresh() {
-      const today = new Date();
+      // const today = new Date();
       // update([today.getFullYear(), today.getMonth() + 1, today.getDate()], false);
       updateAll(false);
     }

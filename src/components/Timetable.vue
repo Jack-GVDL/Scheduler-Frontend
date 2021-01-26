@@ -273,15 +273,21 @@ export default {
           [event[INDEX_TIME][2], event[INDEX_TIME][3]]
         ));
 
-        // tag
-        eventDisplay.push(event[INDEX_TAG_LIST]);
+        // tag and tag color
+        // for display in timetable, tag with special character at the beginning will be ignored
+        const event_list = [];
+        const event_color_list = [];
+        for (let index_tag = 0; index_tag < event[INDEX_TAG_LIST].length; index_tag++) {
+          const tag = event[INDEX_TAG_LIST][index_tag];
+          if (tag.length == 0) continue;
+          if (tag[0] === '*' || tag[0] === '*') continue;
 
-        // tag color - append for palette
-        const paletteList = [];
-        for (let indexTag = 0; indexTag < event[INDEX_TAG_LIST].length; indexTag++) {
-          paletteList.push(getPalette(event[INDEX_TAG_LIST][indexTag]));
+          event_list.push(tag);
+          event_color_list.push(getPalette(tag));
         }
-        eventDisplay.push(paletteList);
+
+        eventDisplay.push(event_list);
+        eventDisplay.push(event_color_list);
 
         // the ground truth index
         eventDisplay.push(i);
@@ -372,11 +378,9 @@ export default {
 
       // ----- config state -----
       else {
-        // pass data (the copied data)
-        const temp = this.eventList[index];
         data = [
-          temp[INDEX_TIME],
-          temp[INDEX_TAG_LIST],
+          Array.from(this.eventList[index][INDEX_TIME]),
+          Array.from(this.eventList[index][INDEX_TAG_LIST]),
           index,
           1
         ]
@@ -406,9 +410,6 @@ export default {
     Handler_rmEvent(index) {
       const today = new Date();
       rmEvent([today.getFullYear(), today.getMonth() + 1, today.getDate()], index);
-
-      // TODO
-      // console.log("Need warning dialog");
     },
 
     Handler_showEventDetail(index) {

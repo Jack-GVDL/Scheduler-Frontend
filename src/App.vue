@@ -11,7 +11,7 @@
 <script>
 import Profile from "@/views/Profile";
 import { ItemManager_addCallback, ItemManager_setItem } from "@/utility/ItemManager";
-import backgroundImage from "@/assets/Background.jpg"
+import backgroundImage from "@/assets/Background_1.jpg"
 
 
 export default {
@@ -21,7 +21,6 @@ export default {
   },
   data: () => ({
     sidebar: false,
-    // background_image: backgroundImage,
     css_property: {
       backgroundImage: 'url(' + backgroundImage + ')'
     }
@@ -29,14 +28,13 @@ export default {
 
   methods: {
     Callback_BackgroundImage(value) {
-      // this.background_image = value;
       this.css_property.backgroundImage = 'url(' + value + ')';
     }
   },
 
   mounted: function() {
-    ItemManager_addCallback("BackgroundImage", this.Callback_BackgroundImage);
     ItemManager_setItem("BackgroundImage", backgroundImage, false);
+    ItemManager_addCallback("BackgroundImage", this.Callback_BackgroundImage);
   }
 };
 </script>
