@@ -1,5 +1,6 @@
 <template>
   <v-navigation-drawer
+    style="position: fixed;"
     class="opacity_1 no_select"
     v-model="sidebar"
     width="100vh"
@@ -183,7 +184,7 @@ export default {
 
 .opacity_1 {
   background: rgba(100, 110, 120, 0.3);
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(2px);
 }
 
 /*tool*/

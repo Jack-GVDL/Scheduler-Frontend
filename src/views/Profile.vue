@@ -1,62 +1,67 @@
 <template>
 
   <div>
+    <Sidebar_DateList
+      v-bind:Interface_DateList_show="Child_DateList_show"
+      v-bind:Interface_DateList_hide="Child_DateList_hide"
+    />
     <Sidebar_Setting
       v-bind:Interface_Setting_show="Child_Setting_show"
       v-bind:Interface_Setting_hide="Child_Setting_hide"
     />
 
-  <!-- widget dashboard -->
-  <v-container class="d-flex-row align-start" fluid>
-
-    <v-row>
-      <!-- nav bar -->
-      <v-app-bar
-        color="rgba(100, 110, 120, 0.5)"
-        dense
+    <!-- nav bar -->
+    <v-app-bar
+      color="rgba(100, 110, 120, 0.5)"
+      elevate-on-scroll
+      dense
+      app
+    >
+      <v-btn
+        icon
+        elevation="0"
       >
-        <v-btn
-          icon
-          elevation="0"
+        <v-app-bar-nav-icon
+          color="white"
+          @click="Child_DateList_show = !Child_DateList_show;"
         >
-          <v-app-bar-nav-icon color="white"></v-app-bar-nav-icon>
-        </v-btn>
-        <v-spacer></v-spacer>
+        </v-app-bar-nav-icon>
+      </v-btn>
+      <v-spacer></v-spacer>
 
-        <v-btn
-          icon
-          elevation="0"
-          @click="Handle_refresh();"
-        >
-          <v-icon color="white">mdi-refresh</v-icon>
-        </v-btn>
+      <v-btn
+        icon
+        elevation="0"
+        @click="Handle_refresh();"
+      >
+        <v-icon color="white">mdi-refresh</v-icon>
+      </v-btn>
 
-        <v-btn
-          icon
-          elevation="0"
-          @click="Child_Setting_show = !Child_Setting_show;"
-        >
-          <v-icon color="white">
-            mdi-dots-vertical
-          </v-icon>
-        </v-btn>
-      </v-app-bar>
-    </v-row>
+      <v-btn
+        icon
+        elevation="0"
+        @click="Child_Setting_show = !Child_Setting_show;"
+      >
+        <v-icon color="white">
+          mdi-dots-vertical
+        </v-icon>
+      </v-btn>
+    </v-app-bar>
 
-    <v-row class="opacity_0">
+    <!-- widget dashboard -->
+    <v-container class="d-flex-row align-start" fluid>
+
+      <v-row style="height: 5vh;">
+      </v-row>
 
       <!-- widget: Today -->
-      <v-col class="opacity_0">
-        <v-card
-          class="opacity_1"
-        >
-          <v-card-title class="backboard white--text text-h2">Today</v-card-title>
+      <v-row class="opacity_0">
+        <v-col class="opacity_0">
           <Timetable />
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container>
+        </v-col>
+      </v-row>
 
+    </v-container>
   </div>
 
 </template>
@@ -66,10 +71,12 @@
 import { update, updateAll } from "@/network/DataServer"
 import Timetable from "@/components/Timetable.vue";
 import Sidebar_Setting from "@/components/Sidebar_Setting";
+import Sidebar_DateList from "@/components/Sidebar_DateList";
 
 
 export default {
   components: {
+    Sidebar_DateList,
     Timetable,
     Sidebar_Setting
   },
@@ -79,7 +86,9 @@ export default {
 
     // interface
     Child_Setting_show: false,
-    Child_Setting_hide: false
+    Child_Setting_hide: false,
+    Child_DateList_show: false,
+    Child_DateList_hide: false
   }),
 
   methods: {
@@ -99,8 +108,8 @@ export default {
 }
 
 .opacity_1 {
-  background: rgba(100, 110, 120, 0.5);
-  backdrop-filter: blur(4px);
+  background: rgba(100, 110, 120, 0.35);
+  backdrop-filter: blur(2px);
 }
 
 .fillHeight {

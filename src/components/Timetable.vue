@@ -1,8 +1,17 @@
 <template>
   <v-card
     flat
-    class="opacity_0 no_select"
+    class="opacity_1 no_select"
   >
+    <v-card-title class="white--text text-h2">
+      Today
+      <v-spacer></v-spacer>
+      <div class="px-4">
+        <v-btn icon>
+          <v-icon color="white">mdi-close</v-icon>
+        </v-btn>
+      </div>
+    </v-card-title>
 
     <!-- top -->
     <v-container
@@ -92,7 +101,11 @@
     />
 
     <!-- scrollable to display time tab -->
-    <v-virtual-scroll :items="eventListDisplay" height="600" item-height="70">
+    <v-virtual-scroll
+      :items="eventListDisplay"
+      height="500"
+      item-height="70"
+    >
 
       <template v-slot="{ item }">
 
@@ -280,7 +293,7 @@ export default {
         for (let index_tag = 0; index_tag < event[INDEX_TAG_LIST].length; index_tag++) {
           const tag = event[INDEX_TAG_LIST][index_tag];
           if (tag.length == 0) continue;
-          if (tag[0] === '*' || tag[0] === '*') continue;
+          if (tag[0] === '*' || tag[0] === '`') continue;
 
           event_list.push(tag);
           event_color_list.push(getPalette(tag));
@@ -469,11 +482,12 @@ export default {
 }
 
 .opacity_0 {
-  background: rgba(100, 110, 120, 0.0);
+  background: rgba(0, 0, 0, 0.0);
 }
 
 .opacity_1 {
-  background: rgba(100, 110, 120, 0.8);
+  background: rgba(100, 110, 120, 0.5);
+  backdrop-filter: blur(4px);
 }
 
 /*tool*/

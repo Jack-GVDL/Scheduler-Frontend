@@ -47,7 +47,7 @@ export function getTaskName(tagList: any) {
     // *
     // `
     if (tagList[i][0] == '*') continue;
-    if (tagList[i][1] == '`') continue;
+    if (tagList[i][0] == '`') continue;
 
     // add ',
     if (name.length != 0) {
