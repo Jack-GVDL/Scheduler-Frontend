@@ -24,7 +24,6 @@
 
     <!-- top -->
     <v-container
-      v-show="is_show_context"
       class="opacity_0"
       fluid
     >
@@ -35,6 +34,7 @@
       </v-row>
 
       <v-row
+        v-show="is_show_context"
         class="my-0"
       >
 
