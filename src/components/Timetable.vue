@@ -4,10 +4,19 @@
     class="opacity_1 no_select"
   >
     <v-card-title class="white--text text-h2">
-      Today
+      {{ content_date }}
       <v-spacer></v-spacer>
       <div class="px-4">
-        <v-btn icon>
+        <v-btn
+          icon
+          @click="is_show_context = !is_show_context"
+        >
+          <v-icon color="white">mdi-minus</v-icon>
+        </v-btn>
+        <v-btn
+          icon
+          @click="Handler_closeEvent();"
+        >
           <v-icon color="white">mdi-close</v-icon>
         </v-btn>
       </div>
@@ -15,6 +24,7 @@
 
     <!-- top -->
     <v-container
+      v-show="is_show_context"
       class="opacity_0"
       fluid
     >
@@ -102,6 +112,7 @@
 
     <!-- scrollable to display time tab -->
     <v-virtual-scroll
+      v-show="is_show_context"
       :items="eventListDisplay"
       height="500"
       item-height="70"
@@ -175,7 +186,14 @@
 
 <script>
 import { getTaskName, getTotalTime, getPalette, pad } from "@/utility/Utility"
-import { registerCallback_Event, addEvent, rmEvent, configEvent } from "@/network/DataServer";
+import {
+  DataServer_registerCallback_EventList,
+  DataServer_unregisterCallback_EventList,
+  DataServer_update_EventList,
+  DataServer_addEvent,
+  DataServer_rmEvent,
+  DataServer_configEvent,
+} from "@/network/DataServer";
 import Sidebar_EventEditor from "@/components/Sidebar_EventEditor";
 
 
@@ -199,14 +217,48 @@ function compareEventName(a, b) {
 }
 
 
-function computeStage(timeStart, timeEnd) {
-  // get time
-  const time_current  = new Date();
-  let   time_start    = new Date();
-  let   time_end      = new Date();
+function getString_Date(date) {
+  const today           = new Date();
+  const yesterday       = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+  const timetable_date  = new Date(date[0], date[1] - 1, date[2]);
 
-  time_start.setHours(timeStart[0], timeStart[1]);
-  time_end.setHours(timeEnd[0], timeEnd[1]);
+  today.setHours(0);          today.setMinutes(0);          today.setSeconds(0);
+  yesterday.setHours(0);      yesterday.setMinutes(0);      yesterday.setSeconds(0);
+  timetable_date.setHours(0); timetable_date.setMinutes(0); today.setSeconds(0);
+
+  // check if date is today
+  if (today.getFullYear() === timetable_date.getFullYear() &&
+      today.getMonth()    === timetable_date.getMonth() &&
+      today.getDate()     === timetable_date.getDate()) {
+    return "Today";
+  }
+
+  // check if date is yesterday
+  if (yesterday.getFullYear() === timetable_date.getFullYear() &&
+      yesterday.getMonth()    === timetable_date.getMonth() &&
+      yesterday.getDate()     === timetable_date.getDate()) {
+    return "Yesterday";
+  }
+
+  return pad(date[0], 4) + '-' + pad(date[1], 2) + '-' + pad(date[2], 2);
+}
+
+
+function computeStage(timeStart, timeEnd, date = null) {
+  // get current time
+  const time_current = new Date();
+
+  // set date if date is null
+  if (date == null) {
+    date = [time_current.getFullYear(), time_current.getMonth() + 1, time_current.getDate()];
+  }
+
+  // get time
+  let   time_start    = new Date(date[0], date[1] - 1, date[2]);
+  let   time_end      = new Date(date[0], date[1] - 1, date[2]);
+
+  time_start.setHours(timeStart[0]); time_end.setMinutes(timeStart[1]);
+  time_end.setHours(timeEnd[0]);     time_end.setMinutes(timeEnd[1]);
 
   // compute stage based on start and end time
   if (timeStart[0] === timeEnd[0] && timeStart[1] === timeEnd[1]) {
@@ -225,8 +277,17 @@ export default {
     Sidebar_EventEditor
   },
 
+  props: [
+    "Interface_Timetable_data"
+  ],
+
   data: () => ({
+    // return data
+    data_return: [0],
+    date: [0, 0, 0],
+
     // statistic
+    content_date: "",
     textTimeTotal: 0,
 
     eventListDisplay: [],
@@ -244,10 +305,10 @@ export default {
     colorRemove: "white",
 
     // show
+    is_show_context: true,
     isShowDelete: false,
 
     // interface
-    // InterfaceToggleSidebar: false,
     ChildShowSidebar: false,
     ChildHideSidebar: false,
     ChildUpdateEvent: []
@@ -258,6 +319,8 @@ export default {
 
   methods: {
     updateEventList(data) {
+      if (data == null) return;
+
       // ----- eventList -----
       this.eventList = data;
 
@@ -283,7 +346,8 @@ export default {
         // stage
         eventDisplay.push(computeStage(
           [event[INDEX_TIME][0], event[INDEX_TIME][1]],
-          [event[INDEX_TIME][2], event[INDEX_TIME][3]]
+          [event[INDEX_TIME][2], event[INDEX_TIME][3]],
+          this.date
         ));
 
         // tag and tag color
@@ -422,11 +486,15 @@ export default {
 
     Handler_rmEvent(index) {
       const today = new Date();
-      rmEvent([today.getFullYear(), today.getMonth() + 1, today.getDate()], index);
+      DataServer_rmEvent([today.getFullYear(), today.getMonth() + 1, today.getDate()], index);
     },
 
     Handler_showEventDetail(index) {
       this.enableSidebar(index);
+    },
+
+    Handler_closeEvent() {
+      this.$emit("Interface_Timetable_close", this.data_return);
     },
 
     ChildSave(data) {
@@ -438,26 +506,51 @@ export default {
       switch (data[3]) {
         // add
         case 0:
-          addEvent(date, data[0].slice(0, 2), data[0].slice(2, 4), data[1]);
+          DataServer_addEvent(date, data[0].slice(0, 2), data[0].slice(2, 4), data[1]);
           break;
 
         // config
         case 1:
-          configEvent(date, data[2], data[0].slice(0, 2), data[0].slice(2, 4), data[1]);
+          DataServer_configEvent(date, data[2], data[0].slice(0, 2), data[0].slice(2, 4), data[1]);
           break;
       }
+    },
+
+    Self_update() {
+      // format
+      // - index
+      // - date
+      const data = Array.from(this.Interface_Timetable_data);
+
+      // unregister the previous hook
+      DataServer_unregisterCallback_EventList(this.date, this.updateEventList)
+
+      // ----- set data ------
+      // return data
+      while (this.data_return.length != 0) this.data_return.pop();
+      this.data_return.push(data[0]);
+
+      // date
+      this.date = data[1];
+      this.content_date = getString_Date(this.date);
+
+      // register the hook
+      DataServer_registerCallback_EventList(this.date, this.updateEventList);
+      DataServer_update_EventList(this.date);
     }
   },
 
   mounted() {
-    const today = new Date();
-    registerCallback_Event(
-      [today.getFullYear(), today.getMonth() + 1, today.getDate()],
-      this.updateEventList
-    );
+    this.Self_update();
   },
 
   updated() {
+  },
+
+  watch: {
+    Interface_Timetable_data(new_value, old_value) {
+      this.Self_update();
+    }
   }
 };
 </script>

@@ -54,10 +54,12 @@
       <v-row style="height: 5vh;">
       </v-row>
 
-      <!-- widget: Today -->
-      <v-row class="opacity_0">
+      <v-row class="opacity_0" v-for="(item, i) in timetable_list">
         <v-col class="opacity_0">
-          <Timetable />
+          <Timetable
+            v-bind:Interface_Timetable_data="[i, item]"
+            v-on:Interface_Timetable_close="Child_Timetable_close"
+          />
         </v-col>
       </v-row>
 
@@ -82,21 +84,38 @@ export default {
   },
 
   data: () => ({
+    // list of timetable
+    timetable_list: [
+      [2021, 1, 28],
+      [2021, 1, 27],
+      [2021, 1, 26]
+    ],
+
+    // unknown, TODO: find it out what it is
     dialogSetting: false,
 
     // interface
     Child_Setting_show: false,
     Child_Setting_hide: false,
     Child_DateList_show: false,
-    Child_DateList_hide: false
+    Child_DateList_hide: false,
   }),
 
   methods: {
     Handle_refresh() {
       // const today = new Date();
       // update([today.getFullYear(), today.getMonth() + 1, today.getDate()], false);
-      updateAll(false);
+      // updateAll(false);
+    },
+
+    Child_Timetable_close(data) {
+      console.log(this.timetable_list);
+      this.timetable_list.splice(data[0], 1);
+      console.log(this.timetable_list);
     }
+  },
+
+  mounted() {
   }
 };
 </script>
@@ -108,7 +127,7 @@ export default {
 }
 
 .opacity_1 {
-  background: rgba(100, 110, 120, 0.35);
+  background: rgba(100, 110, 120, 0.3);
   backdrop-filter: blur(2px);
 }
 

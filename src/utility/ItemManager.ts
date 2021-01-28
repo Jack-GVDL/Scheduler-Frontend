@@ -78,7 +78,7 @@ function _getItem_(item_name: string, default_none: any = null) {
 }
 
 
-function _addCallback_(item_name: any, callback: any, is_create: boolean = true) {
+function _addCallback_(item_name: any, callback: any, is_create: boolean = true, is_invoke: boolean = true) {
   // compute item_name hash
   const hash = _getHash_(item_name);
 
@@ -90,6 +90,9 @@ function _addCallback_(item_name: any, callback: any, is_create: boolean = true)
 
   // add to callback
   item_callback.get(hash).push(callback);
+
+  // check if need to update
+  if (!is_invoke) return false;
 
   // update this callback only
   // remember to lock the item before calling the callback and unlock it after done
@@ -155,7 +158,7 @@ function _update_(item_name: any, hash: any = null, is_checked: boolean = false)
 
 
 // Global Function
-export function ItemManager_addCallback(item_name: string, callback: any) {
+export function ItemManager_addCallback(item_name: string, callback: any, is_invoke: boolean = true) {
   return _addCallback_(item_name, callback, true);
 }
 

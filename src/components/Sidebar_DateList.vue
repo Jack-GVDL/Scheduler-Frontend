@@ -13,7 +13,7 @@
       style="height: 5vh;"
       class="mt-2 d-flex justify-space-between align-center"
     >
-      <div class="mx-6 white--text text-h5 font-weight-light">Date</div>
+      <div class="mx-6 white--text text-h5 font-weight-light">Date List</div>
       <v-btn
         class="mx-5"
         icon
@@ -83,6 +83,16 @@
 
 
 <script>
+// Import
+import { pad } from "@/utility/Utility"
+import { DataServer_registerCallback_DateList, DataServer_update_DateList } from "@/network/DataServer"
+
+
+// Local
+// ...
+
+
+// Global
 export default {
   name: "Sidebar_DateList",
 
@@ -95,14 +105,37 @@ export default {
     is_show: false,
 
     // test data
-    date_list_display: [
-    ]
+    date_list_display: []
   }),
 
-  mounted() {
-    for (let i = 0; i < 200; i++) {
-      this.date_list_display.push("2021 - 01 - 01");
+  methods: {
+    updateDateList(data) {
+      // check if data valid or not
+      if (data == null) return;
+
+      // copy data
+      data = Array.from(data);
+      data.reverse();
+
+      // clear old data
+      while (this.date_list_display.length != 0) this.date_list_display.pop();
+
+      // push new data
+      for (const item of data) {
+        const string = pad(item[0], 4) + " - " + pad(item[1], 2) + " - " + pad(item[2], 2)
+        this.date_list_display.push(string);
+      }
     }
+  },
+
+  mounted() {
+    // test
+    // for (let i = 0; i < 200; i++) {
+    //   this.date_list_display.push("2021 - 01 - 01");
+    // }
+
+    DataServer_registerCallback_DateList(this.updateDateList);
+    DataServer_update_DateList();
   },
 
   watch: {
@@ -133,7 +166,7 @@ export default {
 }
 
 .opacity_1 {
-  background: rgba(100, 110, 120, 0.3);
+  background: rgba(100, 110, 120, 0.2);
   backdrop-filter: blur(2px);
 }
 

@@ -111,7 +111,7 @@
 <script>
 // Import
 import { ItemManager_addCallback, ItemManager_getItem, ItemManager_setItem } from "@/utility/ItemManager";
-import { getServerAddress, setServerAddress } from "@/network/DataServer"
+import { DataServer_getServerAddress, DataServer_setServerAddress } from "@/network/DataServer"
 const { remote } = require("electron");
 
 
@@ -139,7 +139,7 @@ export default {
   methods: {
     // update / reset
     updateForm() {
-      this.textAddress  = getServerAddress();
+      this.textAddress  = DataServer_getServerAddress();
       this.textImage    = ItemManager_getItem("BackgroundImage", "none");
       this.isFullScreen = remote.getCurrentWindow().isFullScreen();
     },
@@ -152,7 +152,7 @@ export default {
     Handler_save() {
       // set configuration
       remote.getCurrentWindow().setFullScreen(this.isFullScreen);
-      setServerAddress(this.textAddress);
+      DataServer_setServerAddress(this.textAddress);
       ItemManager_setItem("BackgroundImage", this.textImage);
 
       // hide
