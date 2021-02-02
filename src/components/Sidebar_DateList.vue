@@ -40,6 +40,7 @@
           <v-container
             style="height: 25px;"
             class="date_tag my-0 py-0 mx-0 px-0"
+            @click="Handler_selectDateTag(item[0]);"
           >
             <v-row class="my-0 py-0 d-flex justify-start">
 
@@ -47,6 +48,7 @@
               <v-col
                 style="padding-top: 1px; padding-bottom: 1px;"
                 class="tag_test ml-3 py-0 px-0 col-1"
+                :class="item[2]"
               >
 
               </v-col>
@@ -57,7 +59,7 @@
                   style="display: inline-block;"
                   class="grey--text text--lighten-3 text-body-2 font-weight-light"
                 >
-                  {{ item }}
+                  {{ item[1] }}
                 </div>
               </v-col>
 
@@ -98,14 +100,16 @@ export default {
 
   props: [
     "Interface_DateList_show",
-    "Interface_DateList_hide"
+    "Interface_DateList_hide",
+    "Interface_DateList_enableTag"
   ],
 
   data: () => ({
     is_show: false,
 
     // test data
-    date_list_display: []
+    date_list_display: [],
+    date_list: []
   }),
 
   methods: {
@@ -114,26 +118,30 @@ export default {
       if (data == null) return;
 
       // copy data
-      data = Array.from(data);
-      data.reverse();
+      this.date_list = Array.from(data);
+      this.date_list.reverse();
+
+      data = this.date_list;
 
       // clear old data
       while (this.date_list_display.length != 0) this.date_list_display.pop();
 
       // push new data
-      for (const item of data) {
+      // - index
+      // - date
+      for (let i = 0; i < data.length; ++i) {
+        const item = data[i];
         const string = pad(item[0], 4) + " - " + pad(item[1], 2) + " - " + pad(item[2], 2)
-        this.date_list_display.push(string);
+        this.date_list_display.push([i, string, "tag_not_selected"]);
       }
+    },
+
+    Handler_selectDateTag(index) {
+      this.$emit("Interface_DateList_tagSelected", this.date_list[index]);
     }
   },
 
   mounted() {
-    // test
-    // for (let i = 0; i < 200; i++) {
-    //   this.date_list_display.push("2021 - 01 - 01");
-    // }
-
     DataServer_registerCallback_DateList(this.updateDateList);
     DataServer_update_DateList();
   },
@@ -145,6 +153,18 @@ export default {
 
     Interface_DateList_hide: function(new_val, old_val) {
       this.is_show = false;
+    },
+
+    Interface_DateList_enableTag: function(new_val, old_val) {
+      const index = this.date_list.findIndex(
+        d => { return d[0] === new_val[0] && d[1] === new_val[1] && d[2] === new_val[2]; }
+      );
+
+      this.date_list_display.splice(
+        index,
+        1,
+        [this.date_list_display[index][0], this.date_list_display[index][1], "tag_selected"]
+      );
     }
   }
 };
@@ -152,7 +172,10 @@ export default {
 
 
 <style scoped>
-.tag_test {
+.tag_not_selected {
+}
+
+.tag_selected {
   border-left: 4px solid #3cd1c2;
 }
 

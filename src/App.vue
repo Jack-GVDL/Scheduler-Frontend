@@ -12,8 +12,9 @@
 import Profile from "@/views/Profile";
 import { ItemManager_addCallback, ItemManager_setItem } from "@/utility/ItemManager";
 // import backgroundImage from "@/assets/Background_1.jpg"
-import backgroundImage from "@/assets/Background_Wlop_1.jpg"
+// import backgroundImage from "@/assets/Background_Wlop_1.jpg"
 // import backgroundImage from "@/assets/Background_Wlop_2.jpg"
+import backgroundImage from "@/assets/Background_Wlop_3.jpg"
 
 
 export default {

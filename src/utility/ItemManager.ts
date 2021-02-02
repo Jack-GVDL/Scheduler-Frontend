@@ -3,6 +3,9 @@ let path_background_image = "";
 const item_callback = new Map();
 const item_cache    = new Map();
 const item_flag     = new Map();
+const delay_update: string[]  = [];
+
+let is_updating = false;
 
 
 // Local Function
@@ -122,7 +125,23 @@ function _rmCallback_(item_name: any, callback: any) {
 }
 
 
+function _updateDelayed_() {
+  while (delay_update.length != 0) {
+    const item_name = delay_update[0];
+    delay_update.splice(0, 1);
+    _update_(item_name);
+  }
+}
+
+
 function _update_(item_name: any, hash: any = null, is_checked: boolean = false) {
+  // global update lock
+  if (is_updating) {
+    delay_update.push(item_name);
+    return;
+  }
+  is_updating = true;
+
   // compute item_name hash
   if (hash == null) hash = _getHash_(item_name);
 
@@ -146,6 +165,10 @@ function _update_(item_name: any, hash: any = null, is_checked: boolean = false)
 
   // unlock the item
   item_flag.set(hash, 0);
+
+  // unlock global update flag and update pending update
+  is_updating = false;
+  _updateDelayed_();
 
   return true;
 }

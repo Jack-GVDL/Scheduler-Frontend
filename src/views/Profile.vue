@@ -4,6 +4,8 @@
     <Sidebar_DateList
       v-bind:Interface_DateList_show="Child_DateList_show"
       v-bind:Interface_DateList_hide="Child_DateList_hide"
+      v-bind:Interface_DateList_enableTag="Child_DateList_enableTag"
+      v-on:Interface_DateList_tagSelected="Child_DateList_tagSelected"
     />
     <Sidebar_Setting
       v-bind:Interface_Setting_show="Child_Setting_show"
@@ -70,7 +72,7 @@
 
 
 <script>
-import { update, updateAll } from "@/network/DataServer"
+import { DataServer_updateAll } from "@/network/DataServer";
 import Timetable from "@/components/Timetable.vue";
 import Sidebar_Setting from "@/components/Sidebar_Setting";
 import Sidebar_DateList from "@/components/Sidebar_DateList";
@@ -86,9 +88,6 @@ export default {
   data: () => ({
     // list of timetable
     timetable_list: [
-      [2021, 1, 28],
-      [2021, 1, 27],
-      [2021, 1, 26]
     ],
 
     // unknown, TODO: find it out what it is
@@ -99,23 +98,38 @@ export default {
     Child_Setting_hide: false,
     Child_DateList_show: false,
     Child_DateList_hide: false,
+    Child_DateList_enableTag: []
   }),
 
   methods: {
     Handle_refresh() {
-      // const today = new Date();
-      // update([today.getFullYear(), today.getMonth() + 1, today.getDate()], false);
-      // updateAll(false);
+      DataServer_updateAll();
     },
 
     Child_Timetable_close(data) {
-      console.log(this.timetable_list);
       this.timetable_list.splice(data[0], 1);
-      console.log(this.timetable_list);
+    },
+
+    Child_DateList_tagSelected(date) {
+      // check if date already existed in the timetable_list
+      // if already existed in the timetable_list, then do nothing
+      if (this.timetable_list.findIndex(
+        d => { return d[0] === date[0] && d[1] === date[1] && d[2] === date[2]; }) >= 0) return;
+
+      // enable this date in Sidebar_DateList
+      this.Child_DateList_enableTag = date;
+
+      // update timetable_list
+      this.timetable_list.push([date[0], date[1], date[2]]);
     }
   },
 
   mounted() {
+    const today     = new Date();
+    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+
+    this.timetable_list.push([today.getFullYear(),     today.getMonth() + 1,     today.getDate()]);
+    this.timetable_list.push([yesterday.getFullYear(), yesterday.getMonth() + 1, yesterday.getDate()]);
   }
 };
 </script>
