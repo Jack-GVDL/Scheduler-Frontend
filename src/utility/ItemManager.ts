@@ -135,13 +135,6 @@ function _updateDelayed_() {
 
 
 function _update_(item_name: any, hash: any = null, is_checked: boolean = false) {
-  // global update lock
-  if (is_updating) {
-    delay_update.push(item_name);
-    return;
-  }
-  is_updating = true;
-
   // compute item_name hash
   if (hash == null) hash = _getHash_(item_name);
 
@@ -149,6 +142,13 @@ function _update_(item_name: any, hash: any = null, is_checked: boolean = false)
   // then check if the item already in update process or not
   if (!is_checked && !item_cache.has(hash)) return false;
   if (item_flag.get(hash) == 1)             return false;
+
+  // global update lock
+  if (is_updating) {
+    delay_update.push(hash);
+    return;
+  }
+  is_updating = true;
 
   // get item
   const item = item_cache.get(hash);

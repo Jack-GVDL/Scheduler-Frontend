@@ -77,6 +77,23 @@ function request_GetEvent_Date(date: any) {
 }
 
 
+function request_AddDate(date: any) {
+  // create request
+  const instance = request({
+    url: "/AddDate",
+    method: "POST",
+    params: {
+      date: date[0] + '_' + date[1] + '_' + date[2],
+    }
+  });
+
+  // send request
+  instance.then(res => {
+    request_GetEvent_Date(date);
+  }).catch();
+}
+
+
 function request_AddEvent(date: any, timeStart: any, timeEnd: any, tagList: any) {
   // compute tag string
   let tag_string = "";
@@ -95,7 +112,7 @@ function request_AddEvent(date: any, timeStart: any, timeEnd: any, tagList: any)
       time_end:   timeEnd[0] + '_' + timeEnd[1],
       tag:        tag_string
     }
-  })
+  });
 
   // send request
   instance.then(res => {
@@ -193,6 +210,11 @@ export function DataServer_updateAll() {
     request_GetEvent_Date(date_list[i]);
   }
   request_GetDateList();
+}
+
+
+export function DataServer_addDate(date: any) {
+  request_AddDate(date);
 }
 
 

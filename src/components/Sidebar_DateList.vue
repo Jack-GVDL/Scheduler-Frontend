@@ -23,11 +23,42 @@
       </v-btn>
     </div>
 
+    <v-container>
+      <v-row>
+
+        <v-col class="mb-0 pb-0">
+          <v-btn
+            small
+            depressed
+            color="transparent"
+            @click="Handler_sortDate()"
+          >
+            <v-icon
+              small
+              color="white"
+            >
+              mdi-alarm-check
+            </v-icon>
+            <div
+             class="mx-2"
+            >
+            </div>
+            <div
+              class="white--text font-weight-light"
+            >
+              {{ text_sort }}
+            </div>
+          </v-btn>
+        </v-col>
+
+      </v-row>
+    </v-container>
+
     <!-- scrollable-->
     <v-virtual-scroll
       style="height: 90vh;"
       item-height="25"
-      :items="date_list_display"
+      :items="date_list"
     >
       <template
         v-slot="{ item }"
@@ -38,7 +69,7 @@
           class="my-0 py-0 mx-4 px-0"
         >
           <v-container
-            style="height: 25px;"
+            style="height: 25px; z-index: 1;"
             class="date_tag my-0 py-0 mx-0 px-0"
             @click="Handler_selectDateTag(item[0]);"
           >
@@ -87,7 +118,11 @@
 <script>
 // Import
 import { pad } from "@/utility/Utility"
-import { DataServer_registerCallback_DateList, DataServer_update_DateList } from "@/network/DataServer"
+import {
+  ItemManager_addCallback,
+  ItemManager_updateItem,
+  ItemManager_getItem
+} from "@/utility/ItemManager";
 
 
 // Local
@@ -100,50 +135,94 @@ export default {
 
   props: [
     "Interface_DateList_show",
-    "Interface_DateList_hide",
-    "Interface_DateList_enableTag"
+    "Interface_DateList_hide"
   ],
 
   data: () => ({
     is_show: false,
-
-    // test data
-    date_list_display: [],
-    date_list: []
+    date_list: [],
+    text_sort: "latest",
+    is_sort_latest: true,
+    is_sorting: false
   }),
 
   methods: {
-    updateDateList(data) {
-      // check if data valid or not
-      if (data == null) return;
+    Handler_sortDate() {
+      if (this.is_sort_latest) {
+        this.text_sort = "oldest";
+        this.is_sort_latest = false;
+        this.Internal_sortDateList(this.is_sort_latest);
 
-      // copy data
-      this.date_list = Array.from(data);
-      this.date_list.reverse();
-
-      data = this.date_list;
-
-      // clear old data
-      while (this.date_list_display.length != 0) this.date_list_display.pop();
-
-      // push new data
-      // - index
-      // - date
-      for (let i = 0; i < data.length; ++i) {
-        const item = data[i];
-        const string = pad(item[0], 4) + " - " + pad(item[1], 2) + " - " + pad(item[2], 2)
-        this.date_list_display.push([i, string, "tag_not_selected"]);
+      } else {
+        this.text_sort = "latest";
+        this.is_sort_latest = true;
+        this.Internal_sortDateList(this.is_sort_latest);
       }
     },
 
-    Handler_selectDateTag(index) {
-      this.$emit("Interface_DateList_tagSelected", this.date_list[index]);
+    Handler_selectDateTag(data) {
+      // CONFIG
+      let index = 0;
+
+      // set date enable list
+      const date_list = ItemManager_getItem("DateEnableList");
+      if (date_list == null) return;
+
+      // find the date
+      index = date_list.findIndex(
+        item => item[0][0] === data[0] && item[0][1] === data[1] && item[0][2] === data[2]);
+      if (index < 0) return;
+
+      // enable date then update
+      date_list[index][1] = true;
+      ItemManager_updateItem("DateEnableList");
+    },
+
+    Hook_updateDateEnableList(data) {
+      // null check
+      if (data == null) return;
+
+      // clear previous
+      // TODO: may need to check before cleaning the list to improve performance
+      while (this.date_list.length != 0) this.date_list.pop();
+
+      // push new
+      for (const item of data) {
+
+        // tag label
+        let string_label = "";
+        if (item[1]) string_label = "tag_selected";
+        else         string_label = "tag_not_selected";
+
+        // date
+        const string_date =
+          pad(item[0][0], 4) + " - " +
+          pad(item[0][1], 2) + " - " +
+          pad(item[0][2], 2);
+
+        this.date_list.push([item[0], string_date, string_label]);
+      }
+    },
+
+    Internal_sortDateList(is_sort_latest) {
+      // lock
+      if (this.is_sorting) return;
+      this.is_sorting = true;
+
+      // actual sorting
+      this.date_list.sort((a, b) => {
+        if (a < b) return is_sort_latest ? -1 : 1;
+        if (a > b) return is_sort_latest ? 1 : -1;
+        return 0;
+      });
+
+      // lock
+      this.is_sorting = false;
     }
   },
 
   mounted() {
-    DataServer_registerCallback_DateList(this.updateDateList);
-    DataServer_update_DateList();
+    ItemManager_addCallback("DateEnableList", this.Hook_updateDateEnableList);
   },
 
   watch: {
@@ -153,18 +232,6 @@ export default {
 
     Interface_DateList_hide: function(new_val, old_val) {
       this.is_show = false;
-    },
-
-    Interface_DateList_enableTag: function(new_val, old_val) {
-      const index = this.date_list.findIndex(
-        d => { return d[0] === new_val[0] && d[1] === new_val[1] && d[2] === new_val[2]; }
-      );
-
-      this.date_list_display.splice(
-        index,
-        1,
-        [this.date_list_display[index][0], this.date_list_display[index][1], "tag_selected"]
-      );
     }
   }
 };

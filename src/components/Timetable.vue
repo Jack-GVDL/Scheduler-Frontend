@@ -70,7 +70,7 @@
               small
               :color="colorTime"
             >
-              folder
+              mdi-alarm-check
             </v-icon>
             <span class="white--text">By Time</span>
           </v-btn>
@@ -283,7 +283,6 @@ export default {
 
   data: () => ({
     // return data
-    data_return: [0],
     date: [0, 0, 0],
 
     // statistic
@@ -494,7 +493,7 @@ export default {
     },
 
     Handler_closeEvent() {
-      this.$emit("Interface_Timetable_close", this.data_return);
+      this.$emit("Interface_Timetable_close", this.date);
     },
 
     ChildSave(data) {
@@ -516,20 +515,15 @@ export default {
 
     Self_update() {
       // format
-      // - index
       // - date
-      const data = Array.from(this.Interface_Timetable_data);
+      const data = this.Interface_Timetable_data;
 
       // unregister the previous hook
       DataServer_unregisterCallback_EventList(this.date, this.updateEventList)
 
       // ----- set data ------
-      // return data
-      while (this.data_return.length != 0) this.data_return.pop();
-      this.data_return.push(data[0]);
-
       // date
-      this.date = data[1];
+      this.date = [data[0], data[1], data[2]];
       this.content_date = getString_Date(this.date);
 
       // register the hook
