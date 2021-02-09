@@ -11,7 +11,8 @@
           icon
           @click="is_show_context = !is_show_context"
         >
-          <v-icon color="white">mdi-minus</v-icon>
+          <v-icon v-if="is_show_context" color="white">mdi-minus</v-icon>
+          <v-icon v-if="!is_show_context" color="white">mdi-plus</v-icon>
         </v-btn>
         <v-btn
           icon

@@ -10,6 +10,7 @@
 
 <script>
 import Profile from "@/views/Profile";
+import { DataServer_init } from "@/network/DataServer"
 import { ItemManager_addCallback, ItemManager_setItem } from "@/utility/ItemManager";
 // import backgroundImage from "@/assets/Background_1.jpg"
 // import backgroundImage from "@/assets/Background_Wlop_1.jpg"
@@ -36,6 +37,10 @@ export default {
   },
 
   mounted: function() {
+    // data server
+    DataServer_init();
+
+    // background image
     ItemManager_setItem("BackgroundImage", backgroundImage, false);
     ItemManager_addCallback("BackgroundImage", this.Callback_BackgroundImage);
   }

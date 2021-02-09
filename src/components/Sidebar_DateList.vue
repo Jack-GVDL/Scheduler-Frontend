@@ -1,26 +1,28 @@
 <template>
 
-  <v-navigation-drawer
-    style="position: fixed;"
-    class="opacity_1 tool_no_select"
-    width="35vh"
-    v-model="is_show"
-    temporary
-    absolute
-  >
+  <div class="tool_no_select mx-0 px-0 flex-grow-1">
+
+<!--  <v-navigation-drawer-->
+<!--    style="position: fixed;"-->
+<!--    class="opacity_3 tool_no_select"-->
+<!--    width="35vh"-->
+<!--    v-model="is_show"-->
+<!--    temporary-->
+<!--    absolute-->
+<!--  >-->
     <!-- top bar -->
     <div
       style="height: 5vh;"
       class="mt-2 d-flex justify-space-between align-center"
     >
       <div class="mx-6 white--text text-h5 font-weight-light">Date List</div>
-      <v-btn
-        class="mx-5"
-        icon
-        @click="is_show = false;"
-      >
-        <v-icon color="white">mdi-arrow-left</v-icon>
-      </v-btn>
+<!--      <v-btn-->
+<!--        class="mx-5"-->
+<!--        icon-->
+<!--        @click="is_show = false;"-->
+<!--      >-->
+<!--        <v-icon color="white">mdi-arrow-left</v-icon>-->
+<!--      </v-btn>-->
     </div>
 
     <v-container>
@@ -88,21 +90,21 @@
               <v-col class="my-0 py-0 mx-0 col-8">
                 <div
                   style="display: inline-block;"
-                  class="grey--text text--lighten-3 text-body-2 font-weight-light"
+                  class="white--text text-body-2 font-weight-light"
                 >
                   {{ item[1] }}
                 </div>
               </v-col>
 
               <!-- icon for filename -->
-              <v-col class="my-0 py-0 col-2 d-flex justify-start">
-                <v-icon
-                  color="grey"
-                  small
-                >
-                  mdi-alarm-check
-                </v-icon>
-              </v-col>
+<!--              <v-col class="my-0 py-0 col-2 d-flex justify-start">-->
+<!--                <v-icon-->
+<!--                  color="grey"-->
+<!--                  small-->
+<!--                >-->
+<!--                  mdi-alarm-check-->
+<!--                </v-icon>-->
+<!--              </v-col>-->
 
             </v-row>
           </v-container>
@@ -110,7 +112,8 @@
 
       </template>
     </v-virtual-scroll>
-  </v-navigation-drawer>
+<!--  </v-navigation-drawer>-->
+  </div>
 
 </template>
 
@@ -211,8 +214,8 @@ export default {
 
       // actual sorting
       this.date_list.sort((a, b) => {
-        if (a < b) return is_sort_latest ? -1 : 1;
-        if (a > b) return is_sort_latest ? 1 : -1;
+        if (a < b) return is_sort_latest ? 1 : -1;
+        if (a > b) return is_sort_latest ? -1 : 1;
         return 0;
       });
 
@@ -222,6 +225,7 @@ export default {
   },
 
   mounted() {
+    this.Internal_sortDateList(this.is_sort_latest);
     ItemManager_addCallback("DateEnableList", this.Hook_updateDateEnableList);
   },
 
@@ -255,8 +259,8 @@ export default {
   /*backdrop-filter: blur(4px);*/
 }
 
-.opacity_1 {
-  background: rgba(100, 110, 120, 0.2);
+.opacity_3 {
+  background: rgba(100, 110, 120, 0.4);
   backdrop-filter: blur(2px);
 }
 

@@ -12,6 +12,8 @@ const date_map              = new Map();
 const date_list: any[]      = [];
 let   serverAddress         = "http://localhost:5000";
 
+let   is_initiated          = false;
+
 
 // Local Function
 // hash
@@ -47,9 +49,11 @@ function request_GetDateList() {
 
   // get data
   instance.then(res => {
-    // put on cache
     ItemManager_setItem("DateList", res.data, true);
-  })
+    ItemManager_setItem("Server_UpdateStatus", 2);
+  }).catch(res => {
+    ItemManager_setItem("Server_UpdateStatus", 3);
+  });
 }
 
 
@@ -73,7 +77,7 @@ function request_GetEvent_Date(date: any) {
 
     // put on cache
     ItemManager_setItem(getString_Date(date), res.data, true);
-  });
+  }).catch();
 }
 
 
@@ -171,6 +175,19 @@ function request_ConfigEvent(date: any, index: bigint, timeStart: any, timeEnd: 
 
 
 // Global Function
+export function DataServer_init() {
+  if (is_initiated) return;
+
+  // Server_UpdateStatus
+  // 0: no update
+  // 1: updating
+  // 2: updated (success)
+  // 3: updated (failed)
+  ItemManager_setItem("Server_UpdateStatus", 0);
+  is_initiated = true;
+}
+
+
 export function DataServer_registerCallback_EventList(date: any, callback: any) {
   // add to manager
   ItemManager_addCallback(getString_Date(date), callback);
@@ -206,6 +223,8 @@ export function DataServer_update_DateList() {
 
 
 export function DataServer_updateAll() {
+  ItemManager_setItem("Server_UpdateStatus", 1);
+
   for (let i = 0; i < date_list.length; i++) {
     request_GetEvent_Date(date_list[i]);
   }

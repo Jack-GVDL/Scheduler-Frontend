@@ -1,10 +1,58 @@
 <template>
 
   <div>
-    <Sidebar_DateList
-      v-bind:Interface_DateList_show="Child_DateList_show"
-      v-bind:Interface_DateList_hide="Child_DateList_hide"
-    />
+    <v-navigation-drawer
+      class="opacity_3 tool_no_select"
+      width="40vh"
+      v-model="is_display_func_side_bar"
+      temporary
+      absolute
+    >
+      <v-row class="mx-0 px-0 my-0">
+        <div
+          style="width: 6vh;"
+          class="opacity_3 tool_no_select d-flex flex-column align-center"
+        >
+
+          <div style="height: 3vh"></div>
+
+          <v-btn
+            class="my-1"
+            icon
+            @click="Child_DateList_show != Child_DateList_show"
+          >
+            <v-icon color="white">calendar_today</v-icon>
+          </v-btn>
+
+          <v-btn
+            class="my-4"
+            icon
+            @click="Child_DateList_show != Child_DateList_show"
+          >
+            <v-icon color="white">align_vertical_bottom</v-icon>
+          </v-btn>
+
+          <v-spacer></v-spacer>
+
+          <v-btn
+            class="my-4"
+            color="transparent"
+            icon
+            @click="is_display_func_side_bar = false"
+          >
+            <v-icon color="white">mdi-arrow-left</v-icon>
+          </v-btn>
+
+        </div>
+
+        <Sidebar_DateList
+          v-bind:Interface_DateList_show="Child_DateList_show"
+          v-bind:Interface_DateList_hide="Child_DateList_hide"
+        />
+
+      </v-row>
+    </v-navigation-drawer>
+
     <Sidebar_Setting
       v-bind:Interface_Setting_show="Child_Setting_show"
       v-bind:Interface_Setting_hide="Child_Setting_hide"
@@ -12,7 +60,7 @@
 
     <!-- nav bar -->
     <v-app-bar
-      color="rgba(100, 110, 120, 0.5)"
+      color="rgba(100, 115, 130, 0.5)"
       elevate-on-scroll
       dense
       app
@@ -23,18 +71,27 @@
       >
         <v-app-bar-nav-icon
           color="white"
-          @click="Child_DateList_show = !Child_DateList_show;"
+          @click="is_display_func_side_bar = !is_display_func_side_bar;"
         >
         </v-app-bar-nav-icon>
       </v-btn>
       <v-spacer></v-spacer>
+
+      <v-slide-x-reverse-transition>
+        <div
+          class="white--text text-h6 font-weight-light mx-2"
+          v-if="is_display_reload_message"
+        >
+          {{ text_reload_message }}
+        </div>
+      </v-slide-x-reverse-transition>
 
       <v-btn
         icon
         elevation="0"
         @click="Handle_refresh();"
       >
-        <v-icon color="white">mdi-refresh</v-icon>
+        <v-icon :color="color_reload_icon">mdi-refresh</v-icon>
       </v-btn>
 
       <v-btn
@@ -95,6 +152,14 @@ export default {
   },
 
   data: () => ({
+    // display control
+    is_display_reload_message: false,
+    is_display_func_side_bar: false,
+
+    text_reload_message: "Load Success",
+
+    color_reload_icon: "white",
+
     // list of timetable
     timetable_list: [],
 
@@ -114,6 +179,7 @@ export default {
 
   methods: {
     Handle_refresh() {
+      this.is_display_reload_message = true;
       DataServer_updateAll();
     },
 
@@ -213,6 +279,34 @@ export default {
         if (!item[1]) continue;
         this.timetable_list.push([item[0][0], item[0][1], item[0][2]]);
       }
+    },
+
+    Hook_updateServerUpdateStatus(data) {
+      if (data == null) return;
+
+      // set text of reload message
+      const reload_text_list = [
+        "",
+        "Reloading",
+        "Load Success",
+        "Load Failed"
+      ];
+
+      this.text_reload_message = reload_text_list[data];
+
+      // if start reloading, the display the reloading message
+      if (data === 0) this.is_display_reload_message = true;
+
+      // after loading (whenever it is success or not), make the text fade after a certain time
+      if (data === 2 || data === 3) {
+        setTimeout(() => {
+          this.is_display_reload_message = false;
+        }, 1000);
+      }
+
+      // set icon color
+      if (data === 2) this.color_reload_icon = "white";
+      if (data === 3) this.color_reload_icon = "red";
     }
   },
 
@@ -230,6 +324,9 @@ export default {
     // ----- date enable list -----
     ItemManager_setItem("DateEnableList", []);
     ItemManager_addCallback("DateEnableList", this.Hook_updateDateEnableList);
+
+    // ----- server update status -----
+    ItemManager_addCallback("Server_UpdateStatus", this.Hook_updateServerUpdateStatus);
   }
 };
 </script>
@@ -241,7 +338,12 @@ export default {
 }
 
 .opacity_1 {
-  background: rgba(100, 110, 120, 0.3);
+  background: rgba(100, 115, 130, 0.3);
+  backdrop-filter: blur(1px);
+}
+
+.opacity_3 {
+  background: rgba(100, 115, 130, 0.35);
   backdrop-filter: blur(2px);
 }
 

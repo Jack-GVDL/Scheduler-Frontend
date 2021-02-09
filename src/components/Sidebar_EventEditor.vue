@@ -68,7 +68,8 @@
                 :rules="[rules.time]"
                 maxlength="5"
                 requried
-                @input="updateSaveButton();"
+                @input="Internal_updateSaveButton();"
+                @blur="Handler_timeUpdated();"
               >
               </v-text-field>
             </v-col>
@@ -86,7 +87,8 @@
                 :rules="[rules.time]"
                 maxlength="5"
                 requried
-                @input="updateSaveButton();"
+                @input="Internal_updateSaveButton();"
+                @blur="Handler_timeUpdated();"
               >
               </v-text-field>
             </v-col>
@@ -280,7 +282,7 @@ export default {
       this.textTask = getTaskName(this.eventTag);
 
       // update
-      this.updateSaveButton();
+      this.Internal_updateSaveButton();
     },
 
     pushEvent() {
@@ -307,15 +309,31 @@ export default {
       this.$emit("Interface_save", data);
     },
 
-    updateTaskName() {
+    Handler_timeUpdated() {
+      // check if format is value or not
+      // if not valid, then fix it
+      const pattern_time = /[0-2][0-9]:[0-5][0-9]/
+      if (!pattern_time.test(this.textTimeStart)) this.textTimeStart = "00:00";
+      if (!pattern_time.test(this.textTimeEnd))   this.textTimeEnd   = "00:00";
+
+      // fix end-time
+      // end-time should be the same as or after the start-time
+      if (this.textTimeStart > this.textTimeEnd) {
+        this.textTimeEnd = this.textTimeStart;
+      }
+
+      this.Internal_updateSaveButton();
+    },
+
+    Internal_updateTaskName() {
       this.textTask = getTaskName(this.eventTag);
     },
 
-    updateSaveButton() {
+    Internal_updateSaveButton() {
       // first disable the save button
       this.isSaveButtonEnabled = false;
 
-      // time -format
+      // time - format
       const pattern_time = /[0-2][0-9]:[0-5][0-9]/;
       if (!pattern_time.test(this.textTimeStart)) return;
       if (!pattern_time.test(this.textTimeEnd))   return;
@@ -354,8 +372,8 @@ export default {
       this.eventColor.splice(index, 1);
 
       // update
-      this.updateTaskName();
-      this.updateSaveButton();
+      this.Internal_updateTaskName();
+      this.Internal_updateSaveButton();
     },
 
     Handler_addTag() {
@@ -385,8 +403,8 @@ export default {
       this.$refs.formTag.reset();
 
       // update
-      this.updateTaskName();
-      this.updateSaveButton();
+      this.Internal_updateTaskName();
+      this.Internal_updateSaveButton();
     }
   },
 
