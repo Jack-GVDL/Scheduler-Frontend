@@ -1,28 +1,13 @@
 <template>
 
-  <div class="tool_no_select mx-0 px-0 flex-grow-1">
+  <div v-if="is_show" class="tool_no_select mx-0 px-0 flex-grow-1">
 
-<!--  <v-navigation-drawer-->
-<!--    style="position: fixed;"-->
-<!--    class="opacity_3 tool_no_select"-->
-<!--    width="35vh"-->
-<!--    v-model="is_show"-->
-<!--    temporary-->
-<!--    absolute-->
-<!--  >-->
     <!-- top bar -->
     <div
       style="height: 5vh;"
       class="mt-2 d-flex justify-space-between align-center"
     >
       <div class="mx-6 white--text text-h5 font-weight-light">Date List</div>
-<!--      <v-btn-->
-<!--        class="mx-5"-->
-<!--        icon-->
-<!--        @click="is_show = false;"-->
-<!--      >-->
-<!--        <v-icon color="white">mdi-arrow-left</v-icon>-->
-<!--      </v-btn>-->
     </div>
 
     <v-container>
@@ -83,11 +68,10 @@
                 class="tag_test ml-3 py-0 px-0 col-1"
                 :class="item[2]"
               >
-
               </v-col>
 
               <!-- filename -->
-              <v-col class="my-0 py-0 mx-0 col-8">
+              <v-col class="my-0 py-0 mx-0 px-0 col-8">
                 <div
                   style="display: inline-block;"
                   class="white--text text-body-2 font-weight-light"
@@ -96,23 +80,12 @@
                 </div>
               </v-col>
 
-              <!-- icon for filename -->
-<!--              <v-col class="my-0 py-0 col-2 d-flex justify-start">-->
-<!--                <v-icon-->
-<!--                  color="grey"-->
-<!--                  small-->
-<!--                >-->
-<!--                  mdi-alarm-check-->
-<!--                </v-icon>-->
-<!--              </v-col>-->
-
             </v-row>
           </v-container>
         </v-list-item>
 
       </template>
     </v-virtual-scroll>
-<!--  </v-navigation-drawer>-->
   </div>
 
 </template>
@@ -214,8 +187,11 @@ export default {
 
       // actual sorting
       this.date_list.sort((a, b) => {
-        if (a < b) return is_sort_latest ? 1 : -1;
-        if (a > b) return is_sort_latest ? -1 : 1;
+        for (let i = 0; i < 3; ++i) {
+          if (a[0][i] === b[0][i]) continue;
+          if (a[0][i] < b[0][i]) return is_sort_latest ? 1 : -1;
+          else                   return is_sort_latest ? -1 : 1;
+        }
         return 0;
       });
 

@@ -2,16 +2,17 @@
 
   <div>
     <v-navigation-drawer
-      class="opacity_3 tool_no_select"
+      style="position: fixed;"
+      class="my-0 py-0 opacity_3 tool_no_select"
       width="40vh"
       v-model="is_display_func_side_bar"
       temporary
       absolute
     >
-      <v-row class="mx-0 px-0 my-0">
+      <v-row style="height: 100vh" class="mx-0 px-0 my-0 py-0">
         <div
           style="width: 6vh;"
-          class="opacity_3 tool_no_select d-flex flex-column align-center"
+          class="my-0 py-0 opacity_3 tool_no_select d-flex flex-column align-center"
         >
 
           <div style="height: 3vh"></div>
@@ -19,7 +20,7 @@
           <v-btn
             class="my-1"
             icon
-            @click="Child_DateList_show != Child_DateList_show"
+            @click="Handler_showDateList()"
           >
             <v-icon color="white">calendar_today</v-icon>
           </v-btn>
@@ -27,9 +28,17 @@
           <v-btn
             class="my-4"
             icon
-            @click="Child_DateList_show != Child_DateList_show"
+            @click="Handler_showAnalyseList()"
           >
             <v-icon color="white">align_vertical_bottom</v-icon>
+          </v-btn>
+
+          <v-btn
+            class="my-1"
+            icon
+            @click="Handler_showTodoList()"
+          >
+            <v-icon color="white">mdi-format-list-checks</v-icon>
           </v-btn>
 
           <v-spacer></v-spacer>
@@ -45,9 +54,26 @@
 
         </div>
 
+        <!-- date list -->
         <Sidebar_DateList
           v-bind:Interface_DateList_show="Child_DateList_show"
           v-bind:Interface_DateList_hide="Child_DateList_hide"
+        />
+
+        <!-- analyse list -->
+        <Sidebar_ItemList
+          v-bind:Interface_show="Child_AnalyseList_show"
+          v-bind:Interface_title="Child_AnalyseList_title"
+          v-bind:Interface_list="Child_AnalyseList_list"
+          v-bind:Interface_hookSelect="Child_AnalyseList_hookSelect"
+        />
+
+        <!-- todo_ list -->
+        <Sidebar_ItemList
+          v-bind:Interface_show="Child_TodoList_show"
+          v-bind:Interface_title="Child_TodoList_title"
+          v-bind:Interface_list="Child_TodoList_list"
+          v-bind:Interface_hookSelect="Child_TodoList_hookSelect"
         />
 
       </v-row>
@@ -89,7 +115,7 @@
       <v-btn
         icon
         elevation="0"
-        @click="Handle_refresh();"
+        @click="Handler_refresh();"
       >
         <v-icon :color="color_reload_icon">mdi-refresh</v-icon>
       </v-btn>
@@ -136,6 +162,7 @@ import {
 import Timetable from "@/components/Timetable.vue";
 import Sidebar_Setting from "@/components/Sidebar_Setting";
 import Sidebar_DateList from "@/components/Sidebar_DateList";
+import Sidebar_ItemList from "@/components/Sidebar_ItemList";
 import {
   ItemManager_addCallback,
   ItemManager_getItem,
@@ -147,6 +174,7 @@ import {
 export default {
   components: {
     Sidebar_DateList,
+    Sidebar_ItemList,
     Timetable,
     Sidebar_Setting
   },
@@ -173,14 +201,42 @@ export default {
     Child_DateList_hide: false,
     Child_DateList_enableTag: [],
 
+    Child_AnalyseList_show: false,
+    Child_AnalyseList_title: "",
+    Child_AnalyseList_list: [],
+    Child_AnalyseList_hookSelect: null,
+
+    Child_TodoList_show: false,
+    Child_TodoList_title: "",
+    Child_TodoList_list: [],
+    Child_TodoList_hookSelect: null,
+
     // miscellaneous
     is_table_initiated: false
   }),
 
   methods: {
-    Handle_refresh() {
+    Handler_refresh() {
       this.is_display_reload_message = true;
       DataServer_updateAll();
+    },
+
+    Handler_showDateList() {
+      this.Child_DateList_show = !this.Child_DateList_show;
+      this.Child_AnalyseList_show = false;
+      this.Child_TodoList_show = false;
+    },
+
+    Handler_showAnalyseList() {
+      this.Child_DateList_hide = !this.Child_DateList_hide;
+      this.Child_AnalyseList_show = true;
+      this.Child_TodoList_show = false;
+    },
+
+    Handler_showTodoList() {
+      this.Child_DateList_hide = !this.Child_DateList_hide;
+      this.Child_AnalyseList_show = false;
+      this.Child_TodoList_show = true;
     },
 
     Child_Timetable_close(data) {
@@ -327,6 +383,37 @@ export default {
 
     // ----- server update status -----
     ItemManager_addCallback("Server_UpdateStatus", this.Hook_updateServerUpdateStatus);
+
+    // ----- sub-sidebar -----
+    this.Child_DateList_show = !this.Child_DateList_show;
+
+    this.Child_AnalyseList_show = false;
+    this.Child_AnalyseList_title = null;
+    this.Child_AnalyseList_title = "Analyse List";
+    this.Child_AnalyseList_list = [
+      [0, "Daily Report",   false,  [0, ""]],
+      [1, "Weekly Report",  true,   [0, ""]],
+      [2, "Monthly Report", false,  [0, ""]]];
+    this.Child_AnalyseList_hookSelect = function(item, is_selected) {
+      if (!is_selected) return true;
+      return true;
+    };
+
+    this.Child_TodoList_show = false;
+    this.Child_TodoList_title = null;
+    this.Child_TodoList_title = "Todo List";
+    this.Child_TodoList_list = [
+      [0, "TODO 1", false, [0, ""]],
+      [1, "TODO 2", false, [0, ""]],
+      [2, "TODO 3", false, [0, ""]],
+      [3, "TODO 4", false, [0, ""]],
+      [4, "TODO 5", false, [0, ""]],
+      [5, "TODO 6", false, [0, ""]]
+    ];
+    this.Child_TodoList_hookSelect = function(item, is_selected) {
+      if (!is_selected) return true;
+      return true;
+    };
   }
 };
 </script>
