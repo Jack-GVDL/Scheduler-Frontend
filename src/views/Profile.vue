@@ -62,18 +62,12 @@
 
         <!-- analyse list -->
         <Sidebar_ItemList
-          v-bind:Interface_show="Child_AnalyseList_show"
-          v-bind:Interface_title="Child_AnalyseList_title"
-          v-bind:Interface_list="Child_AnalyseList_list"
-          v-bind:Interface_hookSelect="Child_AnalyseList_hookSelect"
+          v-bind="child_analyse_list"
         />
 
         <!-- todo_ list -->
         <Sidebar_ItemList
-          v-bind:Interface_show="Child_TodoList_show"
-          v-bind:Interface_title="Child_TodoList_title"
-          v-bind:Interface_list="Child_TodoList_list"
-          v-bind:Interface_hookSelect="Child_TodoList_hookSelect"
+          v-bind="child_todo_list"
         />
 
       </v-row>
@@ -134,9 +128,19 @@
     <!-- widget dashboard -->
     <v-container class="d-flex-row align-start" fluid>
 
-      <v-row style="height: 5vh;">
+      <div style="height: 5vh;"></div>
+
+      <v-row v-for="(item, i) in widget_list">
+        <v-col>
+          <div
+            :is="item[0]"
+            v-bind="item[1]"
+          >
+          </div>
+        </v-col>
       </v-row>
 
+      <!-- TODO: need to be replaced by widget_list -->
       <v-row class="opacity_0" v-for="(item, i) in timetable_list">
         <v-col class="opacity_0">
           <Timetable
@@ -163,6 +167,8 @@ import Timetable from "@/components/Timetable.vue";
 import Sidebar_Setting from "@/components/Sidebar_Setting";
 import Sidebar_DateList from "@/components/Sidebar_DateList";
 import Sidebar_ItemList from "@/components/Sidebar_ItemList";
+import Widget_ReportDaily from "@/components/Widget_ReportDaily";
+import Widget_Base from "@/components/Widget_Base";
 import {
   ItemManager_addCallback,
   ItemManager_getItem,
@@ -176,7 +182,9 @@ export default {
     Sidebar_DateList,
     Sidebar_ItemList,
     Timetable,
-    Sidebar_Setting
+    Sidebar_Setting,
+    Widget_Base,
+    Widget_ReportDaily
   },
 
   data: () => ({
@@ -191,6 +199,15 @@ export default {
     // list of timetable
     timetable_list: [],
 
+    // widget:          widget that in use
+    // widget_template: widget that available to be used
+    widget_list: [],
+    widget_template_list: [
+      ["ReportDaily",   "Widget_ReportDaily",   false]
+      // ["ReportWeekly",  "Widget_ReportWeekly",  false,  {}],
+      // ["ReportMonthly", "Widget_ReportMonthly", false,  {}]
+    ],
+
     // unknown, TODO: find it out what it is
     dialogSetting: false,
 
@@ -201,15 +218,8 @@ export default {
     Child_DateList_hide: false,
     Child_DateList_enableTag: [],
 
-    Child_AnalyseList_show: false,
-    Child_AnalyseList_title: "",
-    Child_AnalyseList_list: [],
-    Child_AnalyseList_hookSelect: null,
-
-    Child_TodoList_show: false,
-    Child_TodoList_title: "",
-    Child_TodoList_list: [],
-    Child_TodoList_hookSelect: null,
+    child_analyse_list: {},
+    child_todo_list: {},
 
     // miscellaneous
     is_table_initiated: false
@@ -223,20 +233,20 @@ export default {
 
     Handler_showDateList() {
       this.Child_DateList_show = !this.Child_DateList_show;
-      this.Child_AnalyseList_show = false;
-      this.Child_TodoList_show = false;
+      this.child_analyse_list.Interface_show.splice(0, 1, false);
+      this.child_todo_list.Interface_show.splice(0, 1, false);
     },
 
     Handler_showAnalyseList() {
       this.Child_DateList_hide = !this.Child_DateList_hide;
-      this.Child_AnalyseList_show = true;
-      this.Child_TodoList_show = false;
+      this.child_analyse_list.Interface_show.splice(0, 1, true);
+      this.child_todo_list.Interface_show.splice(0, 1, false);
     },
 
     Handler_showTodoList() {
       this.Child_DateList_hide = !this.Child_DateList_hide;
-      this.Child_AnalyseList_show = false;
-      this.Child_TodoList_show = true;
+      this.child_analyse_list.Interface_show.splice(0, 1, false);
+      this.child_todo_list.Interface_show.splice(0, 1, true);
     },
 
     Child_Timetable_close(data) {
@@ -363,6 +373,35 @@ export default {
       // set icon color
       if (data === 2) this.color_reload_icon = "white";
       if (data === 3) this.color_reload_icon = "red";
+    },
+
+    Internal_createWidget(name, list_index) {
+      // get the template
+      const index =
+        this.widget_template_list.findIndex(
+          element => element[0] === name
+        );
+      if (index < 0) return false;
+      const widget_template = this.widget_template_list[index];
+
+      // check if it is enabled or not
+      if (widget_template[2] === true) return true;
+
+      // enable / create widget
+      // - components
+      // - v-bind parameter
+      this.widget_list.push(
+        [widget_template[1], {
+          Interface_hookClose: function(item) {
+
+            // TODO: test
+            console.log(item[0].Child_AnalyseList_list);
+            item[0].Child_AnalyseList_list[list_index][2] = false;
+          },
+          Interface_custom: [this]
+        }]);
+
+      return true;
     }
   },
 
@@ -387,33 +426,32 @@ export default {
     // ----- sub-sidebar -----
     this.Child_DateList_show = !this.Child_DateList_show;
 
-    this.Child_AnalyseList_show = false;
-    this.Child_AnalyseList_title = null;
-    this.Child_AnalyseList_title = "Analyse List";
-    this.Child_AnalyseList_list = [
-      [0, "Daily Report",   false,  [0, ""]],
-      [1, "Weekly Report",  true,   [0, ""]],
-      [2, "Monthly Report", false,  [0, ""]]];
-    this.Child_AnalyseList_hookSelect = function(item, is_selected) {
-      if (!is_selected) return true;
-      return true;
+    // analyse list
+    this.child_analyse_list = {
+      Interface_show:       [false],
+      Interface_title:      ["Analyse"],
+      Interface_hookSelect: [function(item, is_selected) {
+        if (!is_selected) return true;
+        if (!item[0].Internal_createWidget(item[1])) return false;
+        return true;
+      }],
+      Interface_list: [
+          [[this, "ReportDaily",   0],  "Daily Report",   false],
+          [[this, "ReportWeekly",  1],  "Weekly Report",  false],
+          [[this, "ReportMonthly", 2],  "Monthly Report", false]
+      ],
+      Interface_custom: [this]
     };
 
-    this.Child_TodoList_show = false;
-    this.Child_TodoList_title = null;
-    this.Child_TodoList_title = "Todo List";
-    this.Child_TodoList_list = [
-      [0, "TODO 1", false, [0, ""]],
-      [1, "TODO 2", false, [0, ""]],
-      [2, "TODO 3", false, [0, ""]],
-      [3, "TODO 4", false, [0, ""]],
-      [4, "TODO 5", false, [0, ""]],
-      [5, "TODO 6", false, [0, ""]]
-    ];
-    this.Child_TodoList_hookSelect = function(item, is_selected) {
-      if (!is_selected) return true;
-      return true;
+    this.child_todo_list = {
+      Interface_show:   [false],
+      Interface_title:  ["Todo"],
+      Interface_hookSelect: [null],
+      Interface_custom: [this]
     };
+
+    // ----- widget list -----
+    // ...
   }
 };
 </script>

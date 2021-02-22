@@ -82,14 +82,16 @@ export default {
     "Interface_show",
     "Interface_title",
     "Interface_list",
-    "Interface_hookSelect"
+    "Interface_hookSelect",
+    "Interface_custom"
   ],
 
   data: () => ({
     is_show: false,
     title: "Unknown",
     list: [],
-    hook_select: null
+    hook_select: null,
+    data_custom: null
   }),
 
   methods: {
@@ -115,7 +117,7 @@ export default {
     Internal_updateList() {
       // check if needed to append memory
       if (this.list.length === 0) return;
-      if (this.list[0].length < 3) {
+      if (this.list[0].length === 3) {
         for (let i = 0; i < this.list.length; ++i) this.list[i].push([0, ""]);
       }
 
@@ -131,13 +133,18 @@ export default {
   mounted() {
   },
 
+  computed: {
+  },
+
   watch: {
     Interface_show: function(new_val, old_val) {
-      this.is_show = new_val;
+      if (new_val.length < 1) return;
+      this.is_show = new_val[0];
     },
 
     Interface_title: function(new_val, old_val) {
-      this.title = new_val;
+      if (new_val.length < 1) return;
+      this.title = new_val[0];
     },
 
     Interface_list: function(new_val, old_val) {
@@ -146,7 +153,13 @@ export default {
     },
 
     Interface_hookSelect: function(new_val, old_val) {
-      this.hook_select = new_val;
+      if (new_val.length < 1) return;
+      this.hook_select = new_val[0];
+    },
+
+    Interface_custom: function(new_val, old_val) {
+      if (new_val.length < 1) return;
+      this.data_custom = new_val[0];
     }
   }
 };
