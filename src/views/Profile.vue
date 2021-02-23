@@ -133,8 +133,8 @@
       <v-row v-for="(item, i) in widget_list">
         <v-col>
           <div
-            :is="item[0]"
-            v-bind="item[1]"
+            :is="item.component_name"
+            v-bind="item.component_parameter"
           >
           </div>
         </v-col>
@@ -199,19 +199,25 @@ export default {
     // list of timetable
     timetable_list: [],
 
+		// description
     // widget:          widget that in use
     // widget_template: widget that available to be used
+		//
+		// format
+		// widget: TODO
+		// widget_template: [entity_name, component_name, widget_name]
     widget_list: [],
     widget_template_list: [
-      ["ReportDaily",   "Widget_ReportDaily",   false]
-      // ["ReportWeekly",  "Widget_ReportWeekly",  false,  {}],
-      // ["ReportMonthly", "Widget_ReportMonthly", false,  {}]
+      ["ReportDaily",   "Widget_ReportDaily",   "Daily Report"],
+      // ["ReportWeekly",  "Widget_ReportWeekly",  "Weekly Report"],
+      // ["ReportMonthly", "Widget_ReportMonthly",	"Monthly Report"]
     ],
 
     // unknown, TODO: find it out what it is
     dialogSetting: false,
 
     // interface
+		// TODO: rename
     Child_Setting_show: false,
     Child_Setting_hide: false,
     Child_DateList_show: false,
@@ -373,35 +379,6 @@ export default {
       // set icon color
       if (data === 2) this.color_reload_icon = "white";
       if (data === 3) this.color_reload_icon = "red";
-    },
-
-    Internal_createWidget(name, list_index) {
-      // get the template
-      const index =
-        this.widget_template_list.findIndex(
-          element => element[0] === name
-        );
-      if (index < 0) return false;
-      const widget_template = this.widget_template_list[index];
-
-      // check if it is enabled or not
-      if (widget_template[2] === true) return true;
-
-      // enable / create widget
-      // - components
-      // - v-bind parameter
-      this.widget_list.push(
-        [widget_template[1], {
-          Interface_hookClose: function(item) {
-
-            // TODO: test
-            console.log(item[0].Child_AnalyseList_list);
-            item[0].Child_AnalyseList_list[list_index][2] = false;
-          },
-          Interface_custom: [this]
-        }]);
-
-      return true;
     }
   },
 
@@ -430,28 +407,95 @@ export default {
     this.child_analyse_list = {
       Interface_show:       [false],
       Interface_title:      ["Analyse"],
-      Interface_hookSelect: [function(item, is_selected) {
-        if (!is_selected) return true;
-        if (!item[0].Internal_createWidget(item[1])) return false;
-        return true;
-      }],
-      Interface_list: [
-          [[this, "ReportDaily",   0],  "Daily Report",   false],
-          [[this, "ReportWeekly",  1],  "Weekly Report",  false],
-          [[this, "ReportMonthly", 2],  "Monthly Report", false]
-      ],
-      Interface_custom: [this]
+      Interface_list:				[],
+      Interface_custom: 		[],
+			Interface_hookSelect: [(item, is_selected) => {
+				if (!is_selected) return true;
+
+				const entity = ItemManager_getItem(item[0]);
+				// if (entity == null) return false;
+				entity.is_enabled = true;
+				ItemManager_updateItem(item[0]);
+
+				return true;
+			}],
     };
 
     this.child_todo_list = {
-      Interface_show:   [false],
-      Interface_title:  ["Todo"],
+      Interface_show:       [false],
+      Interface_title:      ["Todo"],
       Interface_hookSelect: [null],
-      Interface_custom: [this]
+      Interface_custom:     [this]
     };
 
     // ----- widget list -----
-    // ...
+    for (let i = 0; i < this.widget_template_list.length; ++i) {
+
+    	// widget
+			const widget = this.widget_template_list[i];
+
+      // entity
+      ItemManager_setItem(
+        widget[0],
+        {
+          is_enabled: false
+        }
+			);
+
+      // list
+			this.child_analyse_list.Interface_list.push(
+				[[widget[0]], widget[2], false]
+			);
+
+      // linker - entity behavior bind - list enable tag
+      ItemManager_addCallback(
+				widget[0],
+				(entity) => {
+      		const target = this.child_analyse_list.Interface_list[i];
+        	target[2] = entity.is_enabled;
+        	this.child_analyse_list.Interface_list.splice(i, 1, target);
+      	}
+			);
+
+      // linker - entity behavior bind - widget panel (is_show)
+			ItemManager_addCallback(
+				widget[0],
+				(entity) => {
+
+					const index = this.widget_list.findIndex(
+						element => element.entity_name === widget[0]
+					);
+
+					// remove from list
+					if (!entity.is_enabled) {
+						if (index < 0) return;  // widget is already removed from widget list
+						this.widget_list.splice(index, 1);
+						return;
+					}
+
+					// add to list
+					if (index >= 0) return;
+					this.widget_list.push({
+						entity_name: 					widget[0],
+						component_name: 			widget[1],
+						component_parameter: 	{
+							Interface_hookClose: (item) => {
+								const entity = ItemManager_getItem(item.entity_name);
+								// if (entity == null) return;
+								entity.is_enabled = false;
+								ItemManager_updateItem(item.entity_name);
+								return true;
+							},
+							Interface_custom: {
+								entity_name: widget[0]
+							}
+						}
+					});
+
+				}
+			);
+
+    }
   }
 };
 </script>

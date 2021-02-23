@@ -59,8 +59,11 @@ export default {
 
   methods: {
     Handler_close() {
-      this.is_show = false;
-      if (this.hook_close != null) this.hook_close(this.data_custom);
+      let is_show = false;
+      if (this.hook_close != null) {
+      	is_show = this.hook_close(this.data_custom);
+			}
+      this.is_show = is_show;
     },
 
     Handler_minimize() {
