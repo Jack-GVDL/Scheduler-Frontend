@@ -78,18 +78,14 @@ export default {
       Interface_show: true,
       Interface_title: "Daily Report",
 
-      Interface_hookClose: function(item) {
-        // internal
-        item[0].is_show = false;
+			Interface_hookClose: (item) => {
+				item[0].is_show = false;
+				if (item[0].hook_close != null) item[0].hook_close(item[0].data_custom);
+			},
 
-        // external
-        if (item[0].hook_close != null) item[0].hook_close(item[0].data_custom);
-      },
-
-      Interface_hookMinimize: function(item, is_minimize) {
-        // internal
-        item[0].is_minimize = is_minimize;
-      }
+			Interface_hookMinimize: (item, is_minimize) => {
+				item[0].is_minimize = is_minimize;
+			}
     },
 
     // internal

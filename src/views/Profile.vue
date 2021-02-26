@@ -175,6 +175,7 @@ import {
   ItemManager_setItem,
   ItemManager_updateItem
 } from "@/utility/ItemManager";
+import Widget_ReportWeekly from "@/components/Widget_ReportWeekly";
 
 
 export default {
@@ -184,7 +185,8 @@ export default {
     Timetable,
     Sidebar_Setting,
     Widget_Base,
-    Widget_ReportDaily
+    Widget_ReportDaily,
+		Widget_ReportWeekly
   },
 
   data: () => ({
@@ -209,7 +211,7 @@ export default {
     widget_list: [],
     widget_template_list: [
       ["ReportDaily",   "Widget_ReportDaily",   "Daily Report"],
-      // ["ReportWeekly",  "Widget_ReportWeekly",  "Weekly Report"],
+      ["ReportWeekly",  "Widget_ReportWeekly",  "Weekly Report"],
       // ["ReportMonthly", "Widget_ReportMonthly",	"Monthly Report"]
     ],
 

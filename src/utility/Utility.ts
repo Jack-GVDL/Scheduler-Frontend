@@ -113,3 +113,8 @@ export function pad(num: any, size: any) {
   while (num.length < size) num = "0" + num;
   return num;
 }
+
+
+export function getDate_Offset(date: Date, offset: number) {
+  return new Date(date.getTime() + offset * 24 * 60 * 60 * 1000);
+}
