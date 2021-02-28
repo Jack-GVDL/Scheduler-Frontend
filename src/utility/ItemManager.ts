@@ -180,6 +180,11 @@ function _update_(item_name: any, hash: any = null, is_checked: boolean = false)
 // }
 
 
+function _getKeyList_() {
+  return Array.from(item_cache.keys());
+}
+
+
 // Global Function
 export function ItemManager_addCallback(item_name: string, callback: any, is_invoke: boolean = true) {
   return _addCallback_(item_name, callback, true);
@@ -203,4 +208,9 @@ export function ItemManager_updateItem(item_name: string) {
 
 export function ItemManager_getItem(item_name: string, default_none: any = null) {
   return _getItem_(item_name, default_none);
+}
+
+
+export function ItemManager_getKeyList() {
+  return _getKeyList_();
 }

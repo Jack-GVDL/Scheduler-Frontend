@@ -128,7 +128,7 @@
     <!-- widget dashboard -->
     <v-container class="d-flex-row align-start" fluid>
 
-      <div style="height: 5vh;"></div>
+			<div style="height: 5vh;"></div>
 
       <v-row v-for="(item, i) in widget_list">
         <v-col>
@@ -142,7 +142,7 @@
 
       <!-- TODO: need to be replaced by widget_list -->
       <v-row class="opacity_0" v-for="(item, i) in timetable_list">
-        <v-col class="opacity_0">
+        <v-col>
           <Timetable
             v-bind:Interface_Timetable_data="item"
             v-on:Interface_Timetable_close="Child_Timetable_close"
