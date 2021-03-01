@@ -1,12 +1,12 @@
 <script>
-import { Line, mixins } from "vue-chartjs"
+import { Line } from "vue-chartjs"
 import { getDate_Offset, getTotalTime, pad } from "@/utility/Utility";
 import { DataServer_registerCallback_EventList, DataServer_update_EventList } from "@/network/DataServer";
 import { ItemManager_getKeyList } from "@/utility/ItemManager";
 
 
 export default {
-	name: "Chart_TimeWeekly",
+	name: "Chart_Time",
 	extends: Line,
 
 	props: [
@@ -20,6 +20,7 @@ export default {
 	}),
 
 	methods: {
+
 	},
 
 	mounted() {
@@ -29,10 +30,10 @@ export default {
 				{
 					borderColor: "white",
 					borderWidth: 1,
-					data: this.time_list
+					data: []
 				},
 			],
-			labels: this.date_string_list
+			labels: []
 		};
 
 		this.chart_option = {
@@ -41,7 +42,7 @@ export default {
 					display: true,
 					ticks: {
 						fontColor: "white",
-						fontSize: 15,
+						fontSize: 16,
 						stepSize: 1,
 						min: 0,
 						padding: 10
@@ -57,8 +58,7 @@ export default {
 					display: true,
 					ticks: {
 						fontColor: "white",
-						fontFamily: "Helvetica",
-						fontSize: 15,
+						fontSize: 16,
 						padding: 10
 					},
 					gridLines: {
@@ -99,6 +99,8 @@ export default {
 };
 </script>
 
+
 <style scoped>
 
 </style>
+

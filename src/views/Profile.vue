@@ -169,13 +169,13 @@ import Sidebar_DateList from "@/components/Sidebar_DateList";
 import Sidebar_ItemList from "@/components/Sidebar_ItemList";
 import Widget_ReportDaily from "@/components/Widget_ReportDaily";
 import Widget_Base from "@/components/Widget_Base";
-import {
-  ItemManager_addCallback,
-  ItemManager_getItem,
-  ItemManager_setItem,
-  ItemManager_updateItem
-} from "@/utility/ItemManager";
 import Widget_ReportWeekly from "@/components/Widget_ReportWeekly";
+import {
+	ItemManager_addCallback,
+	ItemManager_getItem,
+	ItemManager_setItem,
+	ItemManager_updateItem
+} from "@/utility/ItemManager";
 
 
 export default {

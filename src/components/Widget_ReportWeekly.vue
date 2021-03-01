@@ -54,7 +54,7 @@
 				</div>
 
 				<!-- chart -->
-				<Chart_TimeWeekly
+				<Chart_Time
 					v-bind="child_chart"
 				/>
 
@@ -67,7 +67,7 @@
 
 <script>
 import Widget_Base from "./Widget_Base";
-import Chart_TimeWeekly from "@/components/Chart_TimeWeekly";
+import Chart_Time from "@/components/Chart_Time";
 import {
 	getDate_Offset,
 	getTotalTime, pad
@@ -87,7 +87,7 @@ export default {
 
 	components: {
 		Widget_Base,
-		Chart_TimeWeekly
+		Chart_Time
 	},
 
 	data: () => ({
