@@ -81,7 +81,20 @@ function _getItem_(item_name: string, default_none: any = null) {
 }
 
 
-function _addCallback_(item_name: any, callback: any, is_create: boolean = true, is_invoke: boolean = true) {
+function _getIsExist_(item_name: string) {
+  // compute item_name hash
+  const hash = _getHash_(item_name)
+
+  // check if item exist or not
+  if (!item_cache.has(hash)) return false;
+  return true;
+}
+
+
+function _addCallback_(
+  item_name: any, callback: any,
+  data: any = null, is_create: boolean = true, is_invoke: boolean = true) {
+
   // compute item_name hash
   const hash = _getHash_(item_name);
 
@@ -91,8 +104,13 @@ function _addCallback_(item_name: any, callback: any, is_create: boolean = true,
     _addItem_(item_name);
   }
 
+  // check if callback already existed in callback_list
+  const callback_list = item_callback.get(hash);
+  const index = callback_list.findIndex((element: any[]) => element[0] == callback);
+  if (index >= 0) return false;
+
   // add to callback
-  item_callback.get(hash).push(callback);
+  item_callback.get(hash).push([callback, data]);
 
   // check if need to update
   if (!is_invoke) return false;
@@ -101,7 +119,7 @@ function _addCallback_(item_name: any, callback: any, is_create: boolean = true,
   // remember to lock the item before calling the callback and unlock it after done
   const cache = item_cache.get(hash);
   item_flag.set(hash, 1);
-  callback(cache);
+  callback(cache, data);
   item_flag.set(hash, 0);
 
   return true;
@@ -117,7 +135,7 @@ function _rmCallback_(item_name: any, callback: any) {
 
   // actual removal
   const callback_list = item_callback.get(hash);
-  const index = callback_list.indexOf(callback);
+  const index = callback_list.findIndex((element: any[]) => element[0] == callback);
   if (index < 0) return false;
 
   callback_list.splice(index, 1);
@@ -160,7 +178,7 @@ function _update_(item_name: any, hash: any = null, is_checked: boolean = false)
   // foreach callback
   const callback_list = item_callback.get(hash);
   for (const callback of callback_list) {
-    callback(item);
+    callback[0](item, callback[1]);
   }
 
   // unlock the item
@@ -186,8 +204,8 @@ function _getKeyList_() {
 
 
 // Global Function
-export function ItemManager_addCallback(item_name: string, callback: any, is_invoke: boolean = true) {
-  return _addCallback_(item_name, callback, true);
+export function ItemManager_addCallback(item_name: string, callback: any, is_invoke: boolean = true, data: any = null) {
+  return _addCallback_(item_name, callback, data, true);
 }
 
 
@@ -208,6 +226,11 @@ export function ItemManager_updateItem(item_name: string) {
 
 export function ItemManager_getItem(item_name: string, default_none: any = null) {
   return _getItem_(item_name, default_none);
+}
+
+
+export function ItemManager_getIsExist(item_name: string) {
+  return _getIsExist_(item_name);
 }
 
 

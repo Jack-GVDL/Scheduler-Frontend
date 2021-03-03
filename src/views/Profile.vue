@@ -206,7 +206,6 @@ export default {
     // widget_template: widget that available to be used
 		//
 		// format
-		// widget: TODO
 		// widget_template: [entity_name, component_name, widget_name]
     widget_list: [],
     widget_template_list: [
@@ -396,11 +395,11 @@ export default {
     DataServer_update_DateList();
 
     // ----- date enable list -----
-    ItemManager_setItem("DateEnableList", []);
-    ItemManager_addCallback("DateEnableList", this.Hook_updateDateEnableList);
+    ItemManager_setItem(		"DateEnableList", 			[]);
+    ItemManager_addCallback("DateEnableList", 			this.Hook_updateDateEnableList);
 
     // ----- server update status -----
-    ItemManager_addCallback("Server_UpdateStatus", this.Hook_updateServerUpdateStatus);
+    ItemManager_addCallback("Server_UpdateStatus", 	this.Hook_updateServerUpdateStatus);
 
     // ----- sub-sidebar -----
     this.Child_DateList_show = !this.Child_DateList_show;
@@ -410,6 +409,26 @@ export default {
       Interface_show:       [false],
       Interface_title:      ["Analyse"],
       Interface_list:				[],
+
+			Interface_menu:				[[
+				{
+      		name: "Sort by Name",
+					compare: (a, b) => {
+						if (a[1] < b[1]) return -1;
+						if (a[1] > b[1]) return 1;
+						return 0;
+					}
+				},
+				{
+					name: "Sort by Name (Reversed)",
+					compare: (a, b) => {
+						if (a[1] < b[1]) return 1;
+						if (a[1] > b[1]) return -1;
+						return 0;
+					}
+				}
+			]],
+
       Interface_custom: 		[],
 			Interface_hookSelect: [(item, is_selected) => {
 				if (!is_selected) return true;
@@ -423,6 +442,7 @@ export default {
 			}],
     };
 
+    // to-do list
     this.child_todo_list = {
       Interface_show:       [false],
       Interface_title:      ["Todo"],

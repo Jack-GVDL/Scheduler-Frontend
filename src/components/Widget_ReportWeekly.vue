@@ -218,7 +218,7 @@ export default {
 
 			// update event
 			for (let i = 0; i < this.graph_date_list.length; ++i) {
-				DataServer_update_EventList(this.graph_date_list[i]);
+				DataServer_update_EventList(this.graph_date_list[i], false);
 			}
 		},
 

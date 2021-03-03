@@ -10,17 +10,54 @@
       <div class="mx-6 white--text text-h5 font-weight-light">{{ title }}</div>
     </div>
 
-    <v-container>
-      <v-row>
+		<!-- sort mode -->
+		<div class="mx-6 d-flex justify-end">
+			<v-menu
+				offset-y
+			>
 
-      </v-row>
-    </v-container>
+				<!-- menu enable button -->
+				<template
+					class="d-flex align-center"
+					v-slot:activator="{ on, attr }"
+				>
+					<div
+						style="margin: auto;"
+						class="mx-1 white--text text-body-2 font-weight-light">
+						{{ menu_text }}
+					</div>
+					<v-btn
+						dark
+						icon
+						v-bind="attr"
+						v-on="on"
+					>
+						<v-icon color="white">
+							mdi-cogs
+						</v-icon>
+					</v-btn>
+				</template>
+
+				<!-- menu list -->
+				<v-list class="opacity_4">
+					<v-list-item
+						v-for="(item, index) in menu_list"
+						@click="Handler_selectMenu(index)"
+					>
+						<div class="white--text font-weight-light text-body-2">
+							{{ item.name }}
+						</div>
+					</v-list-item>
+				</v-list>
+
+			</v-menu>
+		</div>
 
     <!-- scrollable-->
     <v-virtual-scroll
       style="height: 90vh;"
       item-height="25"
-      :items="list"
+      :items="item_list"
     >
       <template
         v-slot="{ item }"
@@ -82,6 +119,7 @@ export default {
     "Interface_show",
     "Interface_title",
     "Interface_list",
+		"Interface_menu",
     "Interface_hookSelect",
     "Interface_custom"
   ],
@@ -91,43 +129,73 @@ export default {
     title: "Unknown",
     list: [],
     hook_select: null,
-    data_custom: null
+    data_custom: null,
+
+		item_list: [],
+
+		menu_text: "",
+		menu_index: 0,
+		menu_list: [],
+
+		is_updated: false
   }),
 
   methods: {
     Handler_select(item) {
-      // change tag
-      item[2] = !item[2];
-      item[3][1] = item[2] ? "tag_selected" : "tag_not_selected";
+    	// CONFIG
+			this.is_updated = false;
 
-      // find position of this item in the list
-      const index = this.list.findIndex(cur => cur[3][0] === item[3][0]);
+			// CORE
+      // change tag
+      item[2] 		= !item[2];
+      item[3][1] 	= item[2] ? "tag_selected" : "tag_not_selected";
 
       // handler / hook
       if (this.hook_select != null) {
         const is_selected = this.hook_select(item[0], item[2]);
-        item[2] = is_selected;
-        item[3][1] = item[2] ? "tag_selected" : "tag_not_selected";
+        item[2] 		= is_selected;
+        item[3][1] 	= is_selected ? "tag_selected" : "tag_not_selected";
       }
 
-      // update
-      this.list.splice(index, 1, item);
+      // update (if there is not update call in hook)
+      if (this.is_updated) {
+				const index = this.item_list.findIndex(cur => cur[3][0] === item[3][0]);
+				this.item_list.splice(index, 1, item);
+				this.is_updated = false;
+			}
     },
 
+		Handler_selectMenu(index) {
+			this.menu_index = index;
+			this.Internal_sortList();
+		},
+
     Internal_updateList() {
-      // check if needed to append memory
-      if (this.list.length === 0) return;
-      if (this.list[0].length === 3) {
-        for (let i = 0; i < this.list.length; ++i) this.list[i].push([0, ""]);
-      }
+    	// clear original list
+			this.item_list = [];
 
       // set id and tag_selected
       for (let i = 0; i < this.list.length; ++i) {
-        this.list[i][3][0] = i;
-        this.list[i][3][1] =
-          this.list[i][2] ? "tag_selected" : "tag_not_selected";
+      	this.item_list.push([
+      		this.list[i][0],
+					this.list[i][1],
+					this.list[i][2],
+					[0, this.list[i][2] ? "tag_selected" : "tag_not_selected"]
+				]);
       }
-    }
+
+			// sort
+			this.Internal_sortList();
+
+      // mark as up to date
+			this.is_updated = true;
+    },
+
+		Internal_sortList() {
+			if (this.menu_list.length === 0) return;
+			this.menu_text = this.menu_list[this.menu_index].name;
+			this.item_list.sort(this.menu_list[this.menu_index].compare);
+		}
   },
 
   mounted() {
@@ -151,6 +219,12 @@ export default {
       this.list = new_val;
       this.Internal_updateList();
     },
+
+		Interface_menu: function(new_val, old_val) {
+    	if (new_val.length < 1) return;
+    	this.menu_list = new_val[0];
+    	this.Internal_sortList();
+		},
 
     Interface_hookSelect: function(new_val, old_val) {
       if (new_val.length < 1) return;
@@ -188,6 +262,10 @@ export default {
   backdrop-filter: blur(2px);
 }
 
+.opacity_4 {
+	background: rgba(100, 115, 130, 0.7);
+	backdrop-filter: blur(8px);
+}
 
 .tool_no_select {
   -webkit-touch-callout: none; /* iOS Safari */

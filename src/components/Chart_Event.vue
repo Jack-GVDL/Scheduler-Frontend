@@ -64,7 +64,8 @@ export default {
 					data: this.data.data,
 					backgroundColor: this.data.backgroundColor,
 					borderColor: this.data.borderColor,
-					borderWidth: 1.5
+					borderWidth: 1.5,
+					barThickness: 25
 				}
 			],
 			labels: this.data.label

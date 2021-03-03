@@ -3,8 +3,8 @@ import { pad } from "@/utility/Utility"
 import {
   ItemManager_setItem,
   ItemManager_addCallback,
-  ItemManager_rmCallback
-} from "@/utility/ItemManager.ts"
+  ItemManager_rmCallback, ItemManager_getIsExist, ItemManager_updateItem
+} from "@/utility/ItemManager.ts";
 
 
 // Local Data
@@ -188,15 +188,22 @@ export function DataServer_init() {
 }
 
 
-export function DataServer_registerCallback_EventList(date: any, callback: any) {
-  // add to manager
-  ItemManager_addCallback(getString_Date(date), callback);
-}
-
-
 export function DataServer_registerCallback_DateList(callback: any) {
   // add to manager
   ItemManager_addCallback("DateList", callback);
+}
+
+
+export function DataServer_registerCallback_EventList(date: any, callback: any, data: any = null) {
+  // check if is date already existed
+  // if existed, then no need to make request to server
+  let is_need_request = false;
+  if (!ItemManager_getIsExist(getString_Date(date))) is_need_request = true;
+
+  ItemManager_addCallback(getString_Date(date), callback, true, data);
+
+  // make actual request to server
+  if (is_need_request) request_GetEvent_Date(date);
 }
 
 
@@ -212,13 +219,15 @@ export function DataServer_unregisterCallback_DateList(callback: any) {
 }
 
 
-export function DataServer_update_EventList(date: any) {
-  request_GetEvent_Date(date);
+export function DataServer_update_EventList(date: any, is_request_server: boolean = true) {
+  if (is_request_server)  request_GetEvent_Date(date);
+  else                    ItemManager_updateItem(getString_Date(date));
 }
 
 
-export function DataServer_update_DateList() {
-  request_GetDateList();
+export function DataServer_update_DateList(is_request_server: boolean = true) {
+  if (is_request_server)  request_GetDateList();
+  else                    ItemManager_updateItem("DateList");
 }
 
 
