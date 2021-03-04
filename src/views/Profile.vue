@@ -167,9 +167,10 @@ import Timetable from "@/components/Timetable.vue";
 import Sidebar_Setting from "@/components/Sidebar_Setting";
 import Sidebar_DateList from "@/components/Sidebar_DateList";
 import Sidebar_ItemList from "@/components/Sidebar_ItemList";
-import Widget_ReportDaily from "@/components/Widget_ReportDaily";
+import Widget_ReportEvent from "@/components/Widget_ReportEvent";
+import Widget_ReportTime from "@/components/Widget_ReportTime";
+import Widget_TodoList from "@/components/Widget_TodoList";
 import Widget_Base from "@/components/Widget_Base";
-import Widget_ReportWeekly from "@/components/Widget_ReportWeekly";
 import {
 	ItemManager_addCallback,
 	ItemManager_getItem,
@@ -185,8 +186,9 @@ export default {
     Timetable,
     Sidebar_Setting,
     Widget_Base,
-    Widget_ReportDaily,
-		Widget_ReportWeekly
+		Widget_ReportEvent,
+		Widget_ReportTime,
+		Widget_TodoList
   },
 
   data: () => ({
@@ -209,9 +211,9 @@ export default {
 		// widget_template: [entity_name, component_name, widget_name]
     widget_list: [],
     widget_template_list: [
-      ["ReportDaily",   "Widget_ReportDaily",   "Daily Report"],
-      ["ReportWeekly",  "Widget_ReportWeekly",  "Weekly Report"],
-      // ["ReportMonthly", "Widget_ReportMonthly",	"Monthly Report"]
+      ["ReportEvent",   "Widget_ReportEvent", "Event Report"],
+      ["ReportTime", 		"Widget_ReportTime",	"Time Report"],
+      ["TodoList",			"Widget_TodoList",		"Todo List"]
     ],
 
     // unknown, TODO: find it out what it is

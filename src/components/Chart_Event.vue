@@ -65,7 +65,9 @@ export default {
 					backgroundColor: this.data.backgroundColor,
 					borderColor: this.data.borderColor,
 					borderWidth: 1.5,
-					barThickness: 25
+					barThickness: 25,
+					barPercentage: 0.9,
+					categoryPercentage: 0.9
 				}
 			],
 			labels: this.data.label

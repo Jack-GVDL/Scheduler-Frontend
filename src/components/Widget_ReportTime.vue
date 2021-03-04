@@ -78,7 +78,7 @@ import {
 } from "@/network/DataServer";
 
 export default {
-	name: "Widget_ReportWeekly",
+	name: "Widget_ReportTime",
 
 	props: [
 		"Interface_hookClose",
@@ -95,7 +95,7 @@ export default {
 		child_widget_base: {
 			Interface_custom: [],
 			Interface_show: true,
-			Interface_title: "Weekly Report",
+			Interface_title: "Total Time Report",
 
 			Interface_hookClose: (item) => {
 				item[0].is_show = false;
