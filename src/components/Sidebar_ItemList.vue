@@ -276,7 +276,6 @@ export default {
   user-select: none;           /* Non-prefixed version, currently supported by Chrome and Opera */
 }
 
-
 /* ----- Track ----- */
 /* width */
 ::-webkit-scrollbar {

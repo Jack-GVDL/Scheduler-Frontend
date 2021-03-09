@@ -1,5 +1,6 @@
 <template>
-	<div
+	<v-card
+		flat
 		v-if="is_show"
 		class="opacity_1 no_select"
 	>
@@ -61,7 +62,7 @@
 			</div>
 		</div>
 
-	</div>
+	</v-card>
 </template>
 
 
@@ -95,7 +96,7 @@ export default {
 		child_widget_base: {
 			Interface_custom: [],
 			Interface_show: true,
-			Interface_title: "Total Time Report",
+			Interface_title: "Total Time",
 
 			Interface_hookClose: (item) => {
 				item[0].is_show = false;

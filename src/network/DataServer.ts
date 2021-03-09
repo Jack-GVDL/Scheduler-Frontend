@@ -45,7 +45,7 @@ function request_GetDateList() {
   const instance = request({
     url: "/GetDateList",
     method: "GET"
-  })
+  });
 
   // get data
   instance.then(res => {
@@ -174,6 +174,95 @@ function request_ConfigEvent(date: any, index: bigint, timeStart: any, timeEnd: 
 }
 
 
+function request_GetTodoList() {
+  // create request
+  const instance = request({
+    url: "/GetTodoList",
+    method: "GET"
+  });
+
+  // get data
+  instance.then(res => {
+    ItemManager_setItem("Server/TodoList/Data", res.data, true);;
+    ItemManager_setItem("Server/TodoList/Status", 2);
+  }).catch(res => {
+    ItemManager_setItem("Server/TodoList/Status", 3);
+  });
+}
+
+
+function request_AddTodo(name: string, note: string, is_chain_update: boolean) {
+  // create request
+  const instance = request({
+    url: "/AddTodo",
+    method: "POST",
+    params: {
+      name: name,
+      note: note
+    }
+  });
+
+  // send request
+  instance.then(res => {
+    if (is_chain_update) request_GetTodoList();
+  }).catch();
+}
+
+
+function request_RmTodo(name: string) {
+  // create request
+  const instance = request({
+    url: "/RmTodo",
+    method: "POST",
+    params: {
+      name: name
+    }
+  });
+
+  // send request
+  instance.then(res => {
+    request_GetTodoList();
+  }).catch();
+}
+
+
+function request_AddSubTask(name: string, subtask_name: string, subtask_done: boolean, is_chain_update: boolean) {
+  // create request
+  const instance = request({
+    url: "/AddSubTask",
+    method: "POST",
+    params: {
+      name: name,
+      subtask_name: subtask_name,
+      subtask_don: subtask_done
+    }
+  });
+
+  // send request
+  instance.then(res => {
+    if (is_chain_update) request_GetTodoList();
+  }).catch();
+}
+
+
+function request_RmSubTask(name: string, index: any) {
+  // create request
+  const instance = request({
+    url: "/RmSubTask",
+    method: "POST",
+    params: {
+      name: name,
+      index: index
+    }
+  });
+
+  // send request
+  instance.then(res => {
+    request_GetTodoList();
+  }).catch();
+}
+
+
 // Global Function
 export function DataServer_init() {
   if (is_initiated) return;
@@ -189,7 +278,6 @@ export function DataServer_init() {
 
 
 export function DataServer_registerCallback_DateList(callback: any) {
-  // add to manager
   ItemManager_addCallback("DateList", callback);
 }
 
@@ -207,15 +295,23 @@ export function DataServer_registerCallback_EventList(date: any, callback: any, 
 }
 
 
+export function DataServer_registerCallback_TodoList(callback: any) {
+  ItemManager_addCallback("Server/TodoList/Data", callback);
+}
+
+
 export function DataServer_unregisterCallback_EventList(date: any, callback: any) {
-  // rm from manager
   ItemManager_rmCallback(getString_Date(date), callback);
 }
 
 
 export function DataServer_unregisterCallback_DateList(callback: any) {
-  // rm from manager
   ItemManager_rmCallback("DateList", callback);
+}
+
+
+export function DataServer_unregisterCallback_TodoList(callback: any) {
+  ItemManager_rmCallback("Server/TodoList/Data", callback);
 }
 
 
@@ -228,6 +324,12 @@ export function DataServer_update_EventList(date: any, is_request_server: boolea
 export function DataServer_update_DateList(is_request_server: boolean = true) {
   if (is_request_server)  request_GetDateList();
   else                    ItemManager_updateItem("DateList");
+}
+
+
+export function DataServer_update_TodoList(is_request_server: boolean = true) {
+  if (is_request_server)  request_GetTodoList();
+  else                    ItemManager_updateItem("Server/TodoList/Data");
 }
 
 
@@ -258,6 +360,26 @@ export function DataServer_rmEvent(date: any, index: bigint) {
 
 export function DataServer_configEvent(date: any, index: bigint, timeStart: any, timeEnd: any, tagList: any) {
   request_ConfigEvent(date, index, timeStart, timeEnd, tagList);
+}
+
+
+export function DataServer_addTodo(name: string, is_chain_update: boolean) {
+  request_AddTodo(name, "", is_chain_update);
+}
+
+
+export function DataServer_rmTodo(name: string) {
+  request_RmTodo(name);
+}
+
+
+export function DataServer_addSubTask(name: string, subtask_name: string, subtask_done: boolean, is_chain_update: boolean = true) {
+  request_AddSubTask(name, subtask_name, subtask_done, is_chain_update);
+}
+
+
+export function DataServer_rmSubTask(name: string, index: any) {
+  request_RmSubTask(name, index);
 }
 
 
