@@ -209,32 +209,13 @@ function request_AddTodo(name: string, note: string, is_chain_update: boolean) {
 }
 
 
-function request_RmTodo(name: string) {
+function request_RmTodo(id_: any, is_chain_update: boolean) {
   // create request
   const instance = request({
     url: "/RmTodo",
     method: "POST",
     params: {
-      name: name
-    }
-  });
-
-  // send request
-  instance.then(res => {
-    request_GetTodoList();
-  }).catch();
-}
-
-
-function request_AddSubTask(name: string, subtask_name: string, subtask_done: boolean, is_chain_update: boolean) {
-  // create request
-  const instance = request({
-    url: "/AddSubTask",
-    method: "POST",
-    params: {
-      name: name,
-      subtask_name: subtask_name,
-      subtask_don: subtask_done
+      id: id_
     }
   });
 
@@ -245,21 +226,79 @@ function request_AddSubTask(name: string, subtask_name: string, subtask_done: bo
 }
 
 
-function request_RmSubTask(name: string, index: any) {
+function request_ConfigTodo(id_: any, name: string, note: string, is_chain_update: boolean) {
   // create request
   const instance = request({
-    url: "/RmSubTask",
+    url: "/ConfigTodo",
     method: "POST",
     params: {
+      id:   id_,
       name: name,
-      index: index
+      note: note
     }
   });
 
   // send request
   instance.then(res => {
-    request_GetTodoList();
+    if (is_chain_update) request_GetTodoList();
   }).catch();
+}
+
+
+function request_AddSubTask(id_: any, name: string, is_done: boolean, is_chain_update: boolean) {
+  // create request
+  const instance = request({
+    url: "/AddSubTask",
+    method: "POST",
+    params: {
+      id:       id_,
+      name:     name,
+      is_done:  is_done ? "1" : "0"
+    }
+  });
+
+  // send request
+  instance.then(res => {
+    if (is_chain_update) request_GetTodoList();
+  }).catch();
+}
+
+
+function request_RmSubTask(id_todo: any, id_subtask: any, is_chain_update: boolean) {
+  // create request
+  const instance = request({
+    url: "/RmSubTask",
+    method: "POST",
+    params: {
+      id_todo:    id_todo,
+      id_subtask: id_subtask
+    }
+  });
+
+  // send request
+  instance.then(res => {
+    if (is_chain_update) request_GetTodoList();
+  }).catch();
+}
+
+
+function request_ConfigSubTask(id_todo: any, id_subtask: any, name: string, is_done: boolean, is_chain_update: boolean) {
+  // create request
+  const instance = request({
+    url: "/ConfigSubTask",
+    method: "POST",
+    params: {
+      id_todo:    id_todo,
+      id_subtask: id_subtask,
+      name:       name,
+      is_done:    is_done ? "1" : "0"
+    }
+  });
+
+  // send request
+  instance.then(res => {
+    if (is_chain_update) request_GetTodoList();
+  })
 }
 
 
@@ -363,23 +402,45 @@ export function DataServer_configEvent(date: any, index: bigint, timeStart: any,
 }
 
 
-export function DataServer_addTodo(name: string, is_chain_update: boolean) {
+export function DataServer_addTodo(
+  name: string, is_chain_update: boolean = true) {
+
   request_AddTodo(name, "", is_chain_update);
 }
 
 
-export function DataServer_rmTodo(name: string) {
-  request_RmTodo(name);
+export function DataServer_rmTodo(
+  id_: any, is_chain_update: boolean = true) {
+
+  request_RmTodo(id_, is_chain_update);
 }
 
 
-export function DataServer_addSubTask(name: string, subtask_name: string, subtask_done: boolean, is_chain_update: boolean = true) {
-  request_AddSubTask(name, subtask_name, subtask_done, is_chain_update);
+export function DataServer_configTodo(
+  id_: any, name: string, note: string, is_chain_update: boolean = true) {
+
+  request_ConfigTodo(id_, name, note, is_chain_update);
 }
 
 
-export function DataServer_rmSubTask(name: string, index: any) {
-  request_RmSubTask(name, index);
+export function DataServer_addSubTask(
+  id_: any, name: string, is_done: boolean, is_chain_update: boolean = true) {
+
+  request_AddSubTask(id_, name, is_done, is_chain_update);
+}
+
+
+export function DataServer_rmSubTask(
+  id_todo: any, id_subtask: any, is_chain_update: boolean = true) {
+
+  request_RmSubTask(id_todo, id_subtask, is_chain_update);
+}
+
+
+export function DataServer_configSubTask(
+  id_todo: any, id_subtask: any, name: string, is_done: boolean, is_chain_update: boolean = true) {
+
+  request_ConfigSubTask(id_todo, id_subtask, name, is_done, is_chain_update)
 }
 
 
