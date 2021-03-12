@@ -14,28 +14,6 @@
 		>
 			<div class="mx-6">
 
-				<v-col class="d-flex justify-start">
-					<v-btn
-						small
-						depressed
-						color="transparent"
-						@click="Handler_addTodo();"
-					>
-						<v-icon class="mx-2" color="green">mdi-plus</v-icon>
-						<span class="white--text text-body-1 font-weight-light">Add</span>
-					</v-btn>
-
-					<v-btn
-						small
-						depressed
-						color="transparent"
-						@click="Handler_toggleDeleteButton();"
-					>
-						<v-icon class="mx-2" :color="color_remove">mdi-minus</v-icon>
-						<span class="white--text text-body-1 font-weight-light">Remove</span>
-					</v-btn>
-				</v-col>
-
 				<v-container>
 					<v-row>
 						<v-col>
@@ -51,9 +29,11 @@
 									v-slot="{ item }"
 								>
 
-									<v-list-item dense>
+									<v-list-item
+										class="event_tag"
+										dense
+									>
 										<v-container
-											class="event_tag"
 											@click="Handler_selectTodo(item[0]);"
 										>
 											<v-row>
@@ -64,39 +44,18 @@
 														{{ item[1] }}
 													</div>
 												</v-col>
+												<!-- tag item -->
 
 												<!-- <v-spacer></v-spacer> -->
 
+												<!-- progress -->
 												<v-col class="d-flex justify-end">
 													<v-progress-circular
 														color="white"
-														:value="20"
+														:value="item[2]"
 													></v-progress-circular>
 												</v-col>
-
-												<v-col
-													class="col-1"
-													style="display: inline-block;"
-												>
-													<div
-														style="display: inline-block;"
-														v-show="is_show_delete"
-													>
-														<v-btn
-															icon
-															@click.stop="Handler_rmTodo(item[0]);"
-														>
-															<v-icon
-																class="mx-1"
-																color="error"
-																plain
-															>
-																delete
-															</v-icon>
-														</v-btn>
-													</div>
-												</v-col>
-												<!-- tag item -->
+												<!-- progress -->
 
 											</v-row>
 										</v-container>
@@ -104,6 +63,26 @@
 
 								</template>
 							</v-virtual-scroll>
+
+							<v-container>
+								<v-row>
+									<v-text-field
+										v-model="new_text_name"
+										class="mx-2 my-0 py-0 text-input-white text-body-1 font-weight-light"
+										:rules="[rules.nonEmpty, rules.noSpecialCharacter]"
+										dark
+									>
+									</v-text-field>
+									<v-btn
+										class="green--text text-h6"
+										color="transparent"
+										@click="Handler_addTodo();"
+										plain
+									>
+										Add
+									</v-btn>
+								</v-row>
+							</v-container>
 
 						</v-col>
 						<v-col>
@@ -190,7 +169,7 @@
 														<!-- subtask - checkbox -->
 															<v-checkbox
 																v-model="item[2]"
-                                @blur="Handler_updateSubTask(item[0], item[1], item[2])"
+                                @click="Handler_updateSubTask(item[0], item[1], item[2])"
 																class="pt-1 my-0"
 																dark
 																color="white"
@@ -241,22 +220,21 @@
 								</v-row>
 								<!-- text area -->
 
-								<!-- save, close -->
+								<!-- delete -->
 								<v-row>
 									<v-col class="d-flex justify-end">
 										<v-btn
-											class="mx-3 green--text text-h6"
+											class="mx-3 red--text text-h6"
 											color="transparent"
 											elevation="0"
-											:disabled="!is_show_add_button"
-											@click="Handler_add();"
-                      v-show="is_show_add_button"
+											:disabled="!is_show_remove"
+											@click="Handler_rmTodo();"
 										>
-											Add
+											Remove
 										</v-btn>
 									</v-col>
 								</v-row>
-								<!-- save, close -->
+								<!-- delete -->
 
 							</v-container>
 
@@ -315,12 +293,13 @@ export default {
 		is_show: true,
 		is_minimize: false,
 
-		is_show_delete: false,
-		is_show_add_button: true,
+		is_show_remove: false,
 
 		editor_text_name: "",
 		editor_text_note: "",
 		editor_id_task: -1,
+
+		new_text_name: "",
 
 		todo_list: [],
 		subtask_list: [],
@@ -345,42 +324,13 @@ export default {
 
 	methods: {
 		// Hook
-    // TODO: remove
-		// Handler_save() {
-		// 	// try to add log whatever if log already existed in control
-		// 	DataServer_addTodo(this.editor_text_name, false);
-    //
-		// 	DataServer_clearSubTask(this.editor_text_name, false);
-		// 	for (let i = 0; i < this.subtask_list.length; ++i) {
-		// 		DataServer_addSubTask(
-		// 			this.editor_text_name,
-		// 			this.subtask_list[i][0],
-		// 			this.subtask_list[i][1],
-		// 			false);
-		// 	}
-    //
-		// 	DataServer_update_TodoList();
-		// },
-
-		Handler_toggleDeleteButton() {
-			this.is_show_delete = !this.is_show_delete
-
-			if (this.is_show_delete)	this.color_remove = "red";
-			else											this.color_remove = "white";
-		},
-
 		Handler_addTodo() {
-			this.Internal_setEditorTask(-1);
+			DataServer_addTodo(this.new_text_name);
+			this.new_text_name = "";
 		},
 
-		Handler_rmTodo(id_) {
-			// remove the task
-			DataServer_rmTodo(-1);
-
-			// check if the target task is in editor
-			// if is in editor, then remove from editor (replace it with a new task)
-			if (this.editor_id_task !== id_) return;
-			this.Internal_setEditorTask(-1);
+		Handler_rmTodo() {
+			DataServer_rmTodo(this.editor_id_task);
 		},
 
 		Handler_selectTodo(id_) {
@@ -388,28 +338,26 @@ export default {
 		},
 
     Handler_updateTodo() {
-		  DataServer_configTodo(this.id_todo, this.editor_text_name, this.editor_text_note);
+			DataServer_configTodo(
+				this.editor_id_task,
+				this.editor_text_name,
+				this.editor_text_note
+			);
     },
 
 		Handler_addSubTask() {
-		  DataServer_addSubTask(this.editor_id_task, "", false);
+			DataServer_addSubTask(
+				this.editor_id_task,
+				"",
+				false);
 		},
 
 		Handler_rmSubTask(id_) {
-		  DataServer_rmSubTask(this.editor_id_task, id_);
+			DataServer_rmSubTask(this.editor_id_task, id_);
 		},
 
     Handler_updateSubTask(id_, name, is_done) {
-		  DataServer_configSubTask(this.editor_id_task, id_, name, is_done);
-    },
-
-    // TODO: remove
-		// Handler_updateEditor() {
-		// 	this.Internal_checkEditorUpdate();
-		// },
-
-    Handler_add() {
-
+			DataServer_configSubTask(this.editor_id_task, id_, name, is_done);
     },
 
 		// hook
@@ -430,68 +378,57 @@ export default {
 			// todo list
 			while (this.todo_list.length !== 0) this.todo_list.pop();
 			for (let i = 0; i < this.data_list.length; ++i) {
-			  this.todo_list.push([
-			      this.data_list[i][0],
-            this.data_list[i][1],
-            this.data_list[i][2]
-        ]);
-      }
 
-			// TODO: test
-      console.log(this.data_list);
-      console.log(this.todo_list);
+				let size_done = 0;
+				if (this.data_list[i][3].length !== 0) {
+					for (let index = 0; index < this.data_list[i][3].length; ++index) {
+						if (!this.data_list[i][3][index][2]) continue;
+						size_done++;
+					}
+
+					size_done /= this.data_list[i][3].length;
+					size_done *= 100;
+				}
+
+				this.todo_list.push([
+					this.data_list[i][0],
+					this.data_list[i][1],
+					size_done
+				]);
+			}
+
+			// set editor
+			this.Internal_setEditorTask(this.editor_id_task);
 		},
 
 		// Internal
 		Internal_setEditorTask(id_) {
 		  // check if id_ is valid or not
       const index = this.data_list.findIndex(element => element[0] === id_);
+
+      // show nothing
       if (index < 0) {
-        this.is_show_add_button = true;
+      	this.editor_id_task = -1;
+      	this.editor_text_name = "";
+      	this.editor_text_note = "";
+      	while (this.subtask_list.length !== 0) this.subtask_list.pop();
 
-        this.editor_task 				= -1;
-        this.editor_text_note 	= "";
-        this.editor_text_name 	= "";
-        while (this.subtask_list.length !== 0) this.subtask_list.pop();
-        return;
-      }
+      	this.is_show_remove = false;
+      	return;
+			}
 
-      this.is_show_add_button = false;
-
-			this.editor_task 				= id_;
+      // show todo
+			this.editor_id_task 		= id_;
       this.editor_text_name 	= this.data_list[index][1];
 			this.editor_text_note 	= this.data_list[index][2];
 
 			while (this.subtask_list.length !== 0) this.subtask_list.pop();
-			for (let i = 0; i < this.todo_list[index][3].length; ++i) {
+			for (let i = 0; i < this.data_list[index][3].length; ++i) {
 				this.subtask_list.push(this.data_list[index][3][i]);
 			}
-		},
 
-    // TODO: remove
-		// check if can save the content in the editor
-		// Internal_checkEditorUpdate() {
-		// 	// first disable the save button
-		// 	this.is_enable_save_button = false;
-    //
-		// 	// name
-		// 	if (this.editor_text_name.length === 0) return;
-    //
-		// 	// note
-		// 	// ...
-    //
-		// 	// subtask
-		// 	// subtask name should not be empty
-		// 	for (let i = 0; i < this.subtask_list.length; ++i) {
-		// 		const subtask_name = this.subtask_list[i][0];
-		// 		if (this.rules.noSpecialCharacter(subtask_name) && this.rules.nonEmpty(subtask_name)) continue;
-		// 		return;
-		// 	}
-    //
-		// 	// all condition check
-		// 	// enable the save button
-		// 	this.is_enable_save_button = true;
-		// }
+			this.is_show_remove = true;
+		}
 	},
 
 	mounted() {
