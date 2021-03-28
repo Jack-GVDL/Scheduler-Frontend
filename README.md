@@ -1,24 +1,16 @@
-# dashboard
+# Dashboard
 
 ## Project setup
 ```
 npm install
 ```
 
-### Compiles and hot-reloads for development
+### Compiles and Hot-reloads for Development
 ```
 npm run serve
 ```
 
-### Compiles and minifies for production
+### Compiles and Minifies for Production
 ```
 npm run build
 ```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
