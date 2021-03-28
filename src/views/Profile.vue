@@ -33,13 +33,13 @@
             <v-icon color="white">align_vertical_bottom</v-icon>
           </v-btn>
 
-          <v-btn
-            class="my-1"
-            icon
-            @click="Handler_showTodoList()"
-          >
-            <v-icon color="white">mdi-format-list-checks</v-icon>
-          </v-btn>
+<!--          <v-btn-->
+<!--            class="my-1"-->
+<!--            icon-->
+<!--            @click="Handler_showTodoList()"-->
+<!--          >-->
+<!--            <v-icon color="white">mdi-format-list-checks</v-icon>-->
+<!--          </v-btn>-->
 
           <v-spacer></v-spacer>
 
@@ -66,9 +66,9 @@
         />
 
         <!-- todo_ list -->
-        <Sidebar_ItemList
-          v-bind="child_todo_list"
-        />
+<!--        <Sidebar_ItemList-->
+<!--          v-bind="child_todo_list"-->
+<!--        />-->
 
       </v-row>
     </v-navigation-drawer>
