@@ -2,10 +2,6 @@
 
 ![Dashboard](/document/Dashboard.JPG)
 
-## Server Setup
-
-[ActivityLog](https://github.com/Jack-GVDL/ActivityLog)
-
 ## Project setup
 
 Install necessary package
@@ -25,3 +21,7 @@ Production
 ```
 npm run build
 ```
+
+## Server Setup
+
+[ActivityLog](https://github.com/Jack-GVDL/ActivityLog)
