@@ -2,18 +2,25 @@
 
 ![Dashboard](/document/Dashboard.JPG)
 
+## Server Setup
+
+[ActivityLog](https://github.com/Jack-GVDL/ActivityLog)
+
 ## Project setup
+
+Install necessary package
+
 ```
 npm install
 ```
 
-Compiles and Hot-reloads for Development
+Development
 
 ```
 npm run serve
 ```
 
-Compiles and Minifies for Production
+Production
 
 ```
 npm run build
