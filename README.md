@@ -2,7 +2,7 @@
 
 ![Dashboard](/document/Dashboard.JPG)
 
-## Project setup
+## Project Setup
 
 Install necessary package
 
